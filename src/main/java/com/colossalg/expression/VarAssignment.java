@@ -1,7 +1,5 @@
 package com.colossalg.expression;
 
-import com.colossalg.Token;
-
 public class VarAssignment extends Expression {
 
     public VarAssignment(
@@ -20,14 +18,6 @@ public class VarAssignment extends Expression {
         return visitor.visitVarAssignment(this);
     }
 
-    public int getSymbolTableDepth() {
-        return _symbolTableDepth;
-    }
-
-    public void setSymbolTableDepth(int symbolTableDepth) {
-        _symbolTableDepth = symbolTableDepth;
-    }
-
     public Expression getLhsExpression() {
         return _lhsExpression;
     }
@@ -36,7 +26,6 @@ public class VarAssignment extends Expression {
         return _rhsExpression;
     }
 
-    private int _symbolTableDepth = 0;
     private final Expression _lhsExpression;
     private final Expression _rhsExpression;
 }

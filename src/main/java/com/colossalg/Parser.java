@@ -526,12 +526,6 @@ public class Parser {
         return _tokens.get(_index);
     }
 
-    private Token peekNext() {
-        return isNotAtEnd()
-                ? _tokens.get(_index + 1)
-                : _tokens.getLast(); // EOF always
-    }
-
     private final ErrorReporter _errorReporter;
     private final List<Token> _tokens;
     private int _index = 0;
