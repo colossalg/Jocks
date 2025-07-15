@@ -1,6 +1,7 @@
 package com.colossalg.visitors;
 
 import com.colossalg.dataTypes.JocksValue;
+import com.colossalg.Token;
 
 import java.util.HashMap;
 
@@ -20,38 +21,44 @@ public class SymbolTable {
                 : this;
     }
 
-    public void createVariable(String identifier, JocksValue value) {
-        if (_variables.containsKey(identifier)) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Attempting to create local variable which already exists.");
+    public void createVariable(Token identifier, JocksValue value) {
+        if (_variables.containsKey(identifier.getText())) {
+            throw Interpreter.createException(
+                    "SymbolTable",
+                    identifier.getFile(),
+                    identifier.getLine(),
+                    "Attempting to create variable '" + identifier.getText() + "' which already exists in scope");
         }
-        _variables.put(identifier, value);
+        _variables.put(identifier.getText(), value);
     }
 
-    public JocksValue getVariable(String identifier) {
-        if (!_variables.containsKey(identifier)) {
+    public JocksValue getVariable(Token identifier) {
+        if (!_variables.containsKey(identifier.getText())) {
             if (_parent == null) {
-                // TODO - Need to suss out how to actually handle run time errors.
-                //        Need a way to throw/catch errors within the language itself.
-                throw new IllegalStateException("Attempting to get local variable which does not exist.");
+                throw Interpreter.createException(
+                        "SymbolTable",
+                        identifier.getFile(),
+                        identifier.getLine(),
+                        "Attempting to get variable '" + identifier.getText() + "' which doesn't exist");
             }
             return _parent.getVariable(identifier);
         } else {
-            return _variables.get(identifier);
+            return _variables.get(identifier.getText());
         }
     }
 
-    public void setVariable(String identifier, JocksValue value) {
-        if (!_variables.containsKey(identifier)) {
+    public void setVariable(Token identifier, JocksValue value) {
+        if (!_variables.containsKey(identifier.getText())) {
             if (_parent == null) {
-                // TODO - Need to suss out how to actually handle run time errors.
-                //        Need a way to throw/catch errors within the language itself.
-                throw new IllegalStateException("Attempting to set local variable which does not exist.");
+                throw Interpreter.createException(
+                        "SymbolTable",
+                        identifier.getFile(),
+                        identifier.getLine(),
+                        "Attempting to set variable '" + identifier.getText() + "' which doesn't exist");
             }
             _parent.setVariable(identifier, value);
         } else {
-            _variables.put(identifier, value);
+            _variables.put(identifier.getText(), value);
         }
     }
 

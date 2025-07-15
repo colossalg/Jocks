@@ -2,9 +2,15 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class VarAssignment implements Expression {
+public class VarAssignment extends Expression {
 
-    public VarAssignment(Expression lhsExpression, Expression rhsExpression) {
+    public VarAssignment(
+            String file,
+            int line,
+            Expression lhsExpression,
+            Expression rhsExpression
+    ) {
+        super(file, line);
         _lhsExpression = lhsExpression;
         _rhsExpression = rhsExpression;
     }

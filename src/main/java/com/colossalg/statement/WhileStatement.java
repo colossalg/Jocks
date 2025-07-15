@@ -2,9 +2,15 @@ package com.colossalg.statement;
 
 import com.colossalg.expression.Expression;
 
-public class WhileStatement implements Statement {
+public class WhileStatement extends Statement {
 
-    public WhileStatement(Expression condition, Statement subStatement) {
+    public WhileStatement(
+            String file,
+            int line,
+            Expression condition,
+            Statement subStatement
+    ) {
+        super(file, line);
         _condition = condition;
         _subStatement = subStatement;
     }

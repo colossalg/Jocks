@@ -13,7 +13,7 @@ public class Jocks {
 
         final var stringBuilder = new StringBuilder();
         try {
-            final var reader = new BufferedReader(new FileReader("/home/angus/IdeaProjects/Jocks/test/classes.jocks"));
+            final var reader = new BufferedReader(new FileReader("D:\\Jocks\\test\\classes.jocks"));
             String line = reader.readLine();
             while (line != null) {
                 stringBuilder.append(line);
@@ -62,11 +62,21 @@ public class Jocks {
 
         final var begTime = System.nanoTime();
 
-        final var resolver = new Resolver();
-        final var interpreter = new Interpreter();
-        for (final var statement : statements) {
-            resolver.visit(statement);
-            interpreter.visit(statement);
+        final var resolver = new Resolver(errorReporter);
+        resolver.visitAll(statements);
+        if (!errorReporter.getErrors().isEmpty()) {
+            for (final var error : errorReporter.getErrors()) {
+                System.out.println(error.getMessage());
+            }
+            return;
+        }
+
+        try {
+            final var interpreter = new Interpreter();
+            interpreter.visitAll(statements);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return;
         }
 
         final var endTime = System.nanoTime();

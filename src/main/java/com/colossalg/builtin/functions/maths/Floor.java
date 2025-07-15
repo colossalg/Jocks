@@ -16,9 +16,7 @@ public class Floor extends JocksJavaLandFunction {
     @Override
     public JocksValue call(List<JocksValue> arguments) {
         if (!(arguments.getFirst() instanceof JocksNumber x)) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Arguments was expected to be of type JocksNumber.");
+            throw new IllegalStateException("Floor expects arguments to be of type JocksNumber.");
         }
 
         return new JocksNumber(Math.floor(x.getData()));

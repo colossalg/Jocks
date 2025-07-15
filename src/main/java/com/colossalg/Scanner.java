@@ -5,14 +5,6 @@ import java.util.List;
 
 public class Scanner {
 
-    public static boolean isAlpha(char c) {
-        return (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'));
-    }
-
-    public static boolean isDigit(char c) {
-        return '0' <= c && c <= '9';
-    }
-
     public Scanner(ErrorReporter errorReporter, String source) {
         _errorReporter = errorReporter;
         _source = source;
@@ -60,6 +52,14 @@ public class Scanner {
         return _tokens;
     }
 
+    private static boolean isAlpha(char c) {
+        return (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'));
+    }
+
+    private static boolean isDigit(char c) {
+        return '0' <= c && c <= '9';
+    }
+
     private void tryMatchTrailingEqualsAndScanToken(TokenType yesTrailingEquals, TokenType noTrailingEquals) {
         if (matches('=')) {
             advance();
@@ -86,7 +86,7 @@ public class Scanner {
             reportError("String literal not terminated before EOF.");
         } else {
             advance(); // Consume ending '"'
-            var literal = _source.substring(_begLexemeIndex + 1, _curLexemeIndex - 1);
+            final var literal = _source.substring(_begLexemeIndex + 1, _curLexemeIndex - 1);
             addToken(TokenType.STRING, literal);
         }
     }
@@ -101,7 +101,7 @@ public class Scanner {
         while (!isAtEnd() && isDigit(peekCur())) {
             advance();
         }
-        var literal = Double.parseDouble(_source.substring(_begLexemeIndex, _curLexemeIndex));
+        final var literal = Double.parseDouble(_source.substring(_begLexemeIndex, _curLexemeIndex));
         addToken(TokenType.NUMBER, literal);
     }
 
@@ -110,7 +110,7 @@ public class Scanner {
             advance();
         }
 
-        var literal = _source.substring(_begLexemeIndex, _curLexemeIndex);
+        final var literal = _source.substring(_begLexemeIndex, _curLexemeIndex);
         switch (literal)
         {
             // Keywords
@@ -134,16 +134,16 @@ public class Scanner {
         }
     }
 
-    void advance() {
+    private void advance() {
         _curLexemeIndex++;
     }
 
-    boolean matches(char c) {
+    private boolean matches(char c) {
         return !isAtEnd() && peekCur() == c;
     }
 
     private void reportError(String what) {
-        _errorReporter.report(new ScannerError(what, _file, _line));
+        _errorReporter.report(new JocksError("Scanner", _file, _line, what));
     }
 
     private void addToken(TokenType type) {
@@ -171,6 +171,6 @@ public class Scanner {
     private final List<Token> _tokens = new ArrayList<>();
     private int _begLexemeIndex = 0;
     private int _curLexemeIndex = 0;
-    private final String _file = "";
+    private final String _file = ""; // TODO - When supporting multiple files.
     private int _line = 1;
 }

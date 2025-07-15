@@ -1,12 +1,16 @@
 package com.colossalg.expression;
 
-import com.colossalg.Token;
-
 import java.util.List;
 
-public class FunInvocation implements Expression {
+public class FunInvocation extends Expression {
 
-    public FunInvocation(Expression subExpression, List<Expression> arguments) {
+    public FunInvocation(
+            String file,
+            int line,
+            Expression subExpression,
+            List<Expression> arguments
+    ) {
+        super(file, line);
         _subExpression = subExpression;
         _arguments  = arguments;
     }
@@ -24,7 +28,6 @@ public class FunInvocation implements Expression {
         return _arguments;
     }
 
-    private int _symbolTableDepth = 0;
     private final Expression _subExpression;
     private final List<Expression> _arguments;
 }
