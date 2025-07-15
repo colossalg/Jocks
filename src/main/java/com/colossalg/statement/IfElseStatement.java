@@ -4,9 +4,16 @@ import com.colossalg.expression.Expression;
 
 import java.util.Optional;
 
-public class IfElseStatement implements Statement {
+public class IfElseStatement extends Statement {
 
-    public IfElseStatement(Expression condition, Statement thenSubStatement, Statement elseSubStatement) {
+    public IfElseStatement(
+            String file,
+            int line,
+            Expression condition,
+            Statement thenSubStatement,
+            Statement elseSubStatement
+    ) {
+        super(file, line);
         _condition = condition;
         _thenSubStatement = thenSubStatement;
         _elseSubStatement = elseSubStatement;

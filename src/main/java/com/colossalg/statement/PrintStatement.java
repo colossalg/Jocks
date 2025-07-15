@@ -2,9 +2,14 @@ package com.colossalg.statement;
 
 import com.colossalg.expression.Expression;
 
-public class PrintStatement implements Statement {
+public class PrintStatement extends Statement {
 
-    public PrintStatement(Expression subExpression) {
+    public PrintStatement(
+            String file,
+            int line,
+            Expression subExpression
+    ) {
+        super(file, line);
         _subExpression = subExpression;
     }
 

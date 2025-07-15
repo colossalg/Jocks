@@ -4,16 +4,10 @@ import com.colossalg.dataTypes.primitives.JocksBool;
 
 public abstract class JocksValue {
 
-    public static <T> void assertType(JocksValue value, Class<T> type) {
-        if (!type.isAssignableFrom(value.getClass())) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Value was expected to have type " + type.getTypeName() + ".");
-        }
-    }
-
     public static <T> T cast(JocksValue value, Class<T> type) {
-        assertType(value, type);
+        if (!type.isAssignableFrom(value.getClass())) {
+            throw new IllegalStateException("Internal casting error - Value was expected to have type " + type.getTypeName() + ".");
+        }
         return type.cast(value);
     }
 

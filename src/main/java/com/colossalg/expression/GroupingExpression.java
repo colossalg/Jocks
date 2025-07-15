@@ -1,8 +1,13 @@
 package com.colossalg.expression;
 
-public class GroupingExpression implements Expression {
+public class GroupingExpression extends Expression {
 
-    public GroupingExpression(Expression subExpression) {
+    public GroupingExpression(
+            String file,
+            int line,
+            Expression subExpression
+    ) {
+        super(file, line);
         _subExpression = subExpression;
     }
 

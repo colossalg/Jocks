@@ -4,9 +4,14 @@ import com.colossalg.expression.Expression;
 
 import java.util.Optional;
 
-public class ReturnStatement implements Statement {
+public class ReturnStatement extends Statement {
 
-    public ReturnStatement(Expression subExpression) {
+    public ReturnStatement(
+            String file,
+            int line,
+            Expression subExpression
+    ) {
+        super(file, line);
         _subExpression = subExpression;
     }
 

@@ -4,9 +4,15 @@ import com.colossalg.Token;
 
 import java.util.List;
 
-public class NewInvocation implements Expression {
+public class NewInvocation extends Expression {
 
-    public NewInvocation(Token identifier, List<Expression> arguments) {
+    public NewInvocation(
+            String file,
+            int line,
+            Token identifier,
+            List<Expression> arguments
+    ) {
+        super(file, line);
         _identifier = identifier;
         _arguments  = arguments;
     }

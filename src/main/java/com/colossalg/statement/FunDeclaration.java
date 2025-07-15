@@ -4,9 +4,16 @@ import com.colossalg.Token;
 
 import java.util.List;
 
-public class FunDeclaration implements Statement {
+public class FunDeclaration extends Statement {
 
-    public FunDeclaration(Token identifier, List<Token> parameters, List<Statement> statements) {
+    public FunDeclaration(
+            String file,
+            int line,
+            Token identifier,
+            List<Token> parameters,
+            List<Statement> statements
+    ) {
+        super(file, line);
         _identifier = identifier;
         _parameters = parameters;
         _statements = statements;

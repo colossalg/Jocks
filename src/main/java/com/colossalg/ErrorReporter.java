@@ -5,13 +5,13 @@ import java.util.List;
 
 public class ErrorReporter {
 
-    public void report(Error error) {
+    public void report(JocksError error) {
         _errors.add(error);
     }
 
-    public List<Error> getErrors() {
+    public List<JocksError> getErrors() {
         return _errors;
     }
 
-    private final List<Error> _errors = new ArrayList<>();
+    private final List<JocksError> _errors = new ArrayList<>();
 }

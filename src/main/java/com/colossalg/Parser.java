@@ -19,7 +19,12 @@ public class Parser {
     @FunctionalInterface
     private interface CreateLhsRhsOpExpression {
         @SuppressWarnings("unused") // False alarm I believe, these are all forwarded to Expression subclass constructors.
-        Expression get(Token operator, Expression lhsSubExpression, Expression rhsSubExpression);
+        Expression get(
+                String file,
+                int line,
+                Token operator,
+                Expression lhsSubExpression,
+                Expression rhsSubExpression);
     }
 
     public Parser(ErrorReporter errorReporter, List<Token> tokens) {
@@ -53,6 +58,9 @@ public class Parser {
     }
 
     private ClassDeclaration parseClassDeclaration() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.CLASS);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
@@ -71,10 +79,13 @@ public class Parser {
         }
         consume(TokenType.RGT_BRACE);
 
-        return new ClassDeclaration(identifier, superClass, methods);
+        return new ClassDeclaration(file, line, identifier, superClass, methods);
     }
 
     private FunDeclaration parseFunDeclaration() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.FUN);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
@@ -100,17 +111,21 @@ public class Parser {
         }
         consume(TokenType.RGT_BRACE);
 
-        return new FunDeclaration(identifier, parameters, statements);
+        return new FunDeclaration(file, line, identifier, parameters, statements);
     }
 
     private VarDeclaration parseVarDeclaration() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.VAR);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
         consume(TokenType.EQUAL);
         final var expression = parseExpression();
         consume(TokenType.SEMICOLON);
-        return new VarDeclaration(identifier, expression);
+
+        return new VarDeclaration(file, line, identifier, expression);
     }
 
     private Statement parseNonDeclarationStatement() throws ParserException {
@@ -132,6 +147,9 @@ public class Parser {
     }
 
     private IfElseStatement parseIfElseStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.IF);
         consume(TokenType.LFT_PARENTHESIS);
         final var condition = parseExpression();
@@ -142,19 +160,27 @@ public class Parser {
             consume(TokenType.ELSE);
             elseStatement = parseNonDeclarationStatement();
         }
-        return new IfElseStatement(condition, thenStatement, elseStatement);
+
+        return new IfElseStatement(file, line, condition, thenStatement, elseStatement);
     }
 
     private WhileStatement parseWhileStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.WHILE);
         consume(TokenType.LFT_PARENTHESIS);
         final var condition = parseExpression();
         consume(TokenType.RGT_PARENTHESIS);
         final var subStatement = parseNonDeclarationStatement();
-        return new WhileStatement(condition, subStatement);
+
+        return new WhileStatement(file, line, condition, subStatement);
     }
 
     private ForStatement parseForStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.FOR);
         consume(TokenType.LFT_PARENTHESIS);
 
@@ -190,10 +216,13 @@ public class Parser {
 
         final var subStatement = parseNonDeclarationStatement();
 
-        return new ForStatement(initializer, condition, increment, subStatement);
+        return new ForStatement(file, line, initializer, condition, increment, subStatement);
     }
 
     private BlockStatement parseBlockStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.LFT_BRACE);
         final var subStatements = new ArrayList<Statement>();
         while (isNotAtEnd() && !match(TokenType.RGT_BRACE)) {
@@ -203,30 +232,43 @@ public class Parser {
             }
         }
         consume(TokenType.RGT_BRACE);
-        return new BlockStatement(subStatements);
+
+        return new BlockStatement(file, line, subStatements);
     }
 
     private ReturnStatement parseReturnStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.RETURN);
         Expression subExpression = null;
         if (!match(TokenType.SEMICOLON)) {
             subExpression = parseExpression();
         }
         consume(TokenType.SEMICOLON);
-        return new ReturnStatement(subExpression);
+
+        return new ReturnStatement(file, line, subExpression);
     }
 
     private PrintStatement parsePrintStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.PRINT);
         final var subExpression = parseExpression();
         consume(TokenType.SEMICOLON);
-        return new PrintStatement(subExpression);
+
+        return new PrintStatement(file, line, subExpression);
     }
 
     private ExpressionStatement parseExpressionStatement() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         final var subExpression = parseExpression();
         consume(TokenType.SEMICOLON);
-        return new ExpressionStatement(subExpression);
+
+        return new ExpressionStatement(file, line, subExpression);
     }
 
     private Expression parseExpression() throws ParserException {
@@ -234,7 +276,11 @@ public class Parser {
     }
 
     private Expression parseAssignment() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         var result = parseLogicalOp();
+
         if (match(TokenType.EQUAL)) {
             consume(TokenType.EQUAL);
             if (!(result instanceof VarExpression) && !(result instanceof DotExpression)) {
@@ -242,10 +288,9 @@ public class Parser {
                         "Invalid attempt to assign to LHS token with type %s.",
                         peek().getType().name()));
             }
-            final var lhsExpression = result; // TODO - Have I broke this?
-            final var rhsExpression = parseExpression();
-            result = new VarAssignment(lhsExpression, rhsExpression);
+            result = new VarAssignment(file, line, result, parseExpression());
         }
+
         return result;
     }
 
@@ -311,7 +356,12 @@ public class Parser {
             consume(tokenTypes);
             final var lhsSubExpression = result;
             final var rhsSubExpression = getNextExpr.get();
-            result = createLhsRhsOpExpr.get(operator, lhsSubExpression, rhsSubExpression);
+            result = createLhsRhsOpExpr.get(
+                    operator.getFile(),
+                    operator.getLine(),
+                    operator,
+                    lhsSubExpression,
+                    rhsSubExpression);
         }
         return result;
     }
@@ -327,13 +377,17 @@ public class Parser {
 
         var result = parseAtomic();
         while (!precedingOps.isEmpty()) {
-            result = new UnaryExpression(precedingOps.pop(), result);
+            final var precedingOp = precedingOps.pop();
+            result = new UnaryExpression(
+                    precedingOp.getFile(),
+                    precedingOp.getLine(),
+                    precedingOp,
+                    result);
         }
 
         return result;
     }
 
-    // TODO - Is Atomic a good name considering groupings and function calls contain other expressions?
     private Expression parseAtomic() throws ParserException {
         final var literalTokenTypes = new TokenType[]{
                 TokenType.STRING,
@@ -346,7 +400,10 @@ public class Parser {
         if (match(TokenType.NEW, TokenType.LFT_PARENTHESIS, TokenType.IDENTIFIER)) {
             return parseDotAndFunInvocationChain();
         } else if (match(literalTokenTypes)) {
-            final var result = new LiteralExpression(peek());
+            final var result = new LiteralExpression(
+                    peek().getFile(),
+                    peek().getLine(),
+                    peek());
             consume(literalTokenTypes);
             return result;
         }
@@ -359,16 +416,18 @@ public class Parser {
     private Expression parseDotAndFunInvocationChain() throws ParserException {
         var result = parseInvokable();
         while (match(TokenType.DOT, TokenType.LFT_PARENTHESIS)) {
+            final var file = peek().getFile();
+            final var line = peek().getLine();
             if (match(TokenType.DOT)) {
                 consume(TokenType.DOT);
                 final var lhsExpression = result;
                 final var rhsIdentifier = peek();
                 consume(TokenType.IDENTIFIER);
-                result = new DotExpression(lhsExpression, rhsIdentifier);
+                result = new DotExpression(file, line, lhsExpression, rhsIdentifier);
             } else {
                 final var subExpression = result;
                 final var arguments = parseArgumentList();
-                result = new FunInvocation(subExpression, arguments);
+                result = new FunInvocation(file, line, subExpression, arguments);
             }
         }
         return result;
@@ -398,24 +457,36 @@ public class Parser {
     }
 
     private Expression parseNewInvocation() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.NEW);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
         final var arguments = parseArgumentList();
-        return new NewInvocation(identifier, arguments);
+
+        return new NewInvocation(file, line, identifier, arguments);
     }
 
     private Expression parseGrouping() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         consume(TokenType.LFT_PARENTHESIS);
         final var subExpression = parseExpression();
         consume(TokenType.RGT_PARENTHESIS);
-        return new GroupingExpression(subExpression);
+
+        return new GroupingExpression(file, line, subExpression);
     }
 
     private Expression parseIdentifier() throws ParserException {
+        final var file = peek().getFile();
+        final var line = peek().getLine();
+
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
-        return new VarExpression(identifier);
+
+        return new VarExpression(file, line, identifier);
     }
 
     private void consume(TokenType... tokenTypes) throws ParserException {
@@ -447,8 +518,8 @@ public class Parser {
     }
 
     private ParserException panic(String what) {
-        _errorReporter.report(new ParserError(what, peek()));
-        return new ParserException(); // To unwind call stack
+        _errorReporter.report(new JocksError("Parser", peek().getFile(), peek().getLine(), what));
+        return new ParserException(); // To unwind call stack back to synchronization point, to resume parsing
     }
 
     private Token peek() {

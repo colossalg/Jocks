@@ -13,24 +13,29 @@ import com.colossalg.statement.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<JocksValue> {
 
+    public static IllegalStateException createException(String module, String file, int line, String what) {
+        return new IllegalStateException(String.format("[Interpreter] - (%s:%d) - %s.", file, line, what));
+    }
+
     public Interpreter() {
         // Type checking
-        _symbolTable.createVariable("isNil", new IsType<>(JocksNil.class));
-        _symbolTable.createVariable("isBool", new IsType<>(JocksBool.class));
-        _symbolTable.createVariable("isNumber", new IsType<>(JocksNumber.class));
-        _symbolTable.createVariable("isString", new IsType<>(JocksString.class));
-        _symbolTable.createVariable("isInstance", new IsType<>(JocksInstance.class));
-        _symbolTable.createVariable("isFunction", new IsType<>(JocksFunction.class));
-        _symbolTable.createVariable("isClass", new IsType<>(JocksClass.class));
+        registerInternalVariable("isNil", new IsType<>(JocksNil.class));
+        registerInternalVariable("isBool", new IsType<>(JocksBool.class));
+        registerInternalVariable("isNumber", new IsType<>(JocksNumber.class));
+        registerInternalVariable("isString", new IsType<>(JocksString.class));
+        registerInternalVariable("isInstance", new IsType<>(JocksInstance.class));
+        registerInternalVariable("isFunction", new IsType<>(JocksFunction.class));
+        registerInternalVariable("isClass", new IsType<>(JocksClass.class));
 
         // Maths
-        _symbolTable.createVariable("floor", new Floor());
-        _symbolTable.createVariable("pow", new Pow());
+        registerInternalVariable("floor", new Floor());
+        registerInternalVariable("pow", new Pow());
 
         // Global Object class which all other classes are descendants of.
         // TODO - I need to have a little bit more of a think here.
@@ -49,9 +54,18 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         //              global scope, but that itself is a trade-off.
         //            - It's going to be slower to look the super classes up by
         //              name rather than accessing them through an object reference.
-        _symbolTable.createVariable(
+        registerInternalVariable(
                 "Object",
-                new JocksClass("Object", "Object", new HashMap<>()));
+                new JocksClass(
+                        createInternalIdentifier("Object"),
+                        createInternalIdentifier("Object"),
+                        new HashMap<>()));
+    }
+
+    public void visitAll(List<Statement> statements) {
+        for (final var statement : statements) {
+            visit(statement);
+        }
     }
 
     @Override
@@ -61,14 +75,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitClassDeclaration(ClassDeclaration statement) {
-        final var identifier = statement.getIdentifier().getText();
-        final var superClass = statement.getSuperClass().isPresent()
-                ? statement.getSuperClass().get().getText()
-                : "Object";
+        final var identifier = statement.getIdentifier();
+        final var superClass = statement.getSuperClass()
+                .orElse(createInternalIdentifier("Object"));
 
         pushSymbolTable();
         _symbolTable.createVariable(
-                "super",
+                createInternalIdentifier("super"),
                 _symbolTable.getVariable(superClass));
 
         final var methods = new HashMap<String, JocksFunction>();
@@ -81,11 +94,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         popSymbolTable();
 
         _symbolTable.createVariable(
-                statement.getIdentifier().getText(),
-                new JocksClass(
-                        identifier,
-                        superClass,
-                        methods));
+                identifier,
+                new JocksClass(identifier, superClass, methods));
 
         return null;
     }
@@ -93,7 +103,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitFunDeclaration(FunDeclaration statement) {
         _symbolTable.createVariable(
-                statement.getIdentifier().getText(),
+                statement.getIdentifier(),
                 funDeclarationToJocksFunction(statement));
 
         return null;
@@ -102,7 +112,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitVarDeclaration(VarDeclaration statement) {
         _symbolTable.createVariable(
-                statement.getIdentifier().getText(),
+                statement.getIdentifier(),
                 visit(statement.getExpression()));
 
         return null;
@@ -110,7 +120,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitIfElseStatement(IfElseStatement statement) {
-        final var conditionResult = JocksValue.cast(visit(statement.getCondition()), JocksBool.class);
+        final var conditionResult = JocksValue.cast(
+                visit(statement.getCondition()),
+                JocksBool.class);
         if (conditionResult == JocksBool.Truthy) {
             visit(statement.getThenSubStatement());
         } else if (statement.getElseSubStatement().isPresent()) {
@@ -124,7 +136,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public Void visitWhileStatement(WhileStatement statement) {
         // Helper lambda to evaluate condition, checking that type is JocksBool, etc.
         final Supplier<JocksBool> evaluateCondition = () -> {
-            return JocksValue.cast(visit(statement.getCondition()), JocksBool.class);
+            return JocksValue.cast(
+                    visit(statement.getCondition()),
+                    JocksBool.class);
         };
 
         while (evaluateCondition.get() == JocksBool.Truthy) {
@@ -142,7 +156,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             if (condition.isEmpty()) {
                 return JocksBool.Truthy;
             }
-            return JocksValue.cast(visit(condition.get()), JocksBool.class);
+            return JocksValue.cast(
+                    visit(condition.get()),
+                    JocksBool.class);
         };
 
         pushSymbolTable();
@@ -173,16 +189,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitReturnStatement(ReturnStatement statement) {
-        // TODO - Need to have a think about this.
-        //        Is it a bit ugly for the function invocation to evaluate the return statement itself?
-        //        It does simplify the control flow, as if we do it there we can just pop right out the
-        //        function, whereas we lack some context if we do the evaluation here in another method.
-        //        On the other hand, I want to support try/catch/finally blocks eventually and that will
-        //        require a way to jump around in the call stack, so maybe the mechanisms used there can
-        //        be shared.
-        // TODO - Need to suss out how to actually handle run time errors.
-        //        Need a way to throw/catch errors within the language itself.
-        throw new UnsupportedOperationException("Can't directly evaluate return statement.");
+        // TODO - This currently doesn't support return statements which are
+        //        a child of another statement (if / while / for / block).
+        throw createException(
+                "Interpreter",
+                statement.getFile(),
+                statement.getLine(),
+                "Can't directly evaluate return statement");
     }
 
     @Override
@@ -205,27 +218,36 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public JocksValue visitLogicalExpression(LogicalExpression expression) {
-        final var operatorType = expression.getOperator().getType();
-        final var shortCircuitValue = switch (operatorType) {
+        final var operator = expression.getOperator();
+        final var shortCircuitValue = switch (operator.getType()) {
             case TokenType.AND -> JocksBool.Falsey;
             case TokenType.OR  -> JocksBool.Truthy;
-            default -> throw new IllegalStateException("Invalid logical operator type '" + operatorType.name() + "'.");
+            default -> throw createException(
+                    "Interpreter",
+                    operator.getFile(),
+                    operator.getLine(),
+                    "Invalid logical operator type '" + operator.getType().name() + "'");
         };
 
-        final var lftSubExpressionResult = JocksValue.cast(visit(expression.getLftSubExpression()), JocksBool.class);
+        final var lftSubExpressionResult = JocksValue.cast(
+                visit(expression.getLftSubExpression()),
+                JocksBool.class);
+
         if (lftSubExpressionResult == shortCircuitValue) {
             return lftSubExpressionResult;
         }
 
-        return JocksValue.cast(visit(expression.getRgtSubExpression()), JocksBool.class);
+        return JocksValue.cast(
+                visit(expression.getRgtSubExpression()),
+                JocksBool.class);
     }
 
     @Override
     public JocksValue visitBinaryExpression(BinaryExpression expression) {
-        final var operatorType = expression.getOperator().getType();
+        final var operator = expression.getOperator();
         final var lftSubExpressionResult = visit(expression.getLftSubExpression());
         final var rgtSubExpressionResult = visit(expression.getRgtSubExpression());
-        return switch (operatorType) {
+        return switch (operator.getType()) {
             case TokenType.EQUAL_EQUAL -> lftSubExpressionResult.equal(rgtSubExpressionResult);
             case TokenType.BANGS_EQUAL -> lftSubExpressionResult.notEqual(rgtSubExpressionResult);
             case TokenType.LESS_THAN -> lftSubExpressionResult.lessThan(rgtSubExpressionResult);
@@ -236,19 +258,27 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             case TokenType.SUB -> lftSubExpressionResult.sub(rgtSubExpressionResult);
             case TokenType.MUL -> lftSubExpressionResult.mul(rgtSubExpressionResult);
             case TokenType.DIV -> lftSubExpressionResult.div(rgtSubExpressionResult);
-            default -> throw new IllegalStateException("Invalid binary operator type '" + operatorType.name() + "'.");
+            default -> throw createException(
+                    "Interpreter",
+                    operator.getFile(),
+                    operator.getLine(),
+                    "Invalid binary operator type '" + operator.getType().name() + "'");
         };
     }
 
     @Override
     public JocksValue visitUnaryExpression(UnaryExpression expression) {
+        final var operator = expression.getOperator();
         final var subExpressionResult = visit(expression.getSubExpression());
-        final var operatorType = expression.getOperator().getType();
-        return switch (operatorType) {
+        return switch (operator.getType()) {
             case TokenType.BANGS -> subExpressionResult.not();
             case TokenType.ADD -> subExpressionResult.add();
             case TokenType.SUB -> subExpressionResult.sub();
-            default -> throw new IllegalStateException("Invalid unary operator type '" + operatorType.name() + "'.");
+            default -> throw createException(
+                    "Interpreter",
+                    operator.getFile(),
+                    operator.getLine(),
+                    "Invalid unary operator type '" + operator.getType().name() + "'");
         };
     }
 
@@ -260,42 +290,31 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public JocksValue visitDotExpression(DotExpression expression) {
         final var lhsExpressionResult = visit(expression.getLhsExpression());
+        final var rhsIdentifier = expression.getRhsIdentifier();
+
         if ((lhsExpressionResult instanceof JocksInstance instance)) {
-            var property = instance.getProperty(expression.getRhsIdentifier().getText());
-            if (property.isPresent()) {
-                return property.get();
-            } else {
-                JocksClass currClass = null;
-                JocksClass nextClass = JocksValue.cast(_symbolTable.getVariable(instance.getClassName()), JocksClass.class);
-                while (currClass != nextClass) {
-                    currClass = nextClass;
-                    nextClass = JocksValue.cast(_symbolTable.getVariable(currClass.getSuperClass()), JocksClass.class);
-                    final var method = currClass.getMethod(expression.getRhsIdentifier().getText());
-                    if (method.isPresent()) {
-                        return new BoundMethod(instance, method.get());
-                    }
-                }
-            }
-        } else if ((lhsExpressionResult instanceof JocksClass jclass)) {
-            JocksClass currClass = null;
-            JocksClass nextClass = jclass;
-            while (currClass != nextClass) {
-                currClass = nextClass;
-                nextClass = JocksValue.cast(_symbolTable.getVariable(currClass.getSuperClass()), JocksClass.class);
-                final var method = currClass.getMethod(expression.getRhsIdentifier().getText());
-                if (method.isPresent()) {
-                    return method.get();
-                }
-            }
-        } else {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Expression referenced did not evaluate to an instance or class.");
+            return findPropertyOrMethod(instance, rhsIdentifier.getText())
+                    .orElseThrow(() -> createException(
+                            "Interpreter",
+                            rhsIdentifier.getFile(),
+                            rhsIdentifier.getLine(),
+                            "Couldn't find property or method '" + rhsIdentifier.getText() + "' on instance"));
         }
 
-        // TODO - Need to suss out how to actually handle run time errors.
-        //        Need a way to throw/catch errors within the language itself.
-        throw new IllegalStateException("Some shit went wrong");
+        if ((lhsExpressionResult instanceof JocksClass jClass)) {
+            return findMethod(jClass, rhsIdentifier.getText())
+                    .orElseThrow(() -> createException(
+                            "Interpreter",
+                            rhsIdentifier.getFile(),
+                            rhsIdentifier.getLine(),
+                            "Couldn't find property or method '" + rhsIdentifier.getText() + "' on class"));
+        }
+
+        throw createException(
+                "Interpreter",
+                rhsIdentifier.getFile(),
+                rhsIdentifier.getLine(),
+                "Expression referenced did not evaluate to an instance or class");
     }
 
     @Override
@@ -304,10 +323,14 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                 visit(expression.getSubExpression()),
                 JocksFunction.class);
 
-        if (invoked.getArity() != expression.getArguments().size()) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Number of parameters does not match number of arguments provided.");
+        final var funcArity = invoked.getArity();
+        final var exprArity = expression.getArguments().size();
+        if (funcArity != exprArity) {
+            throw createException(
+                    "Interpreter",
+                    expression.getFile(),
+                    expression.getLine(),
+                    String.format("Number of parameters (%d) did not match what was expected (%d)", funcArity, exprArity));
         }
 
         final var argumentResults = new ArrayList<JocksValue>();
@@ -323,16 +346,20 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var invoked = JocksValue.cast(
                 _symbolTable
                         .getAncestor(expression.getSymbolTableDepth())
-                        .getVariable(expression.getIdentifier().getText()),
+                        .getVariable(expression.getIdentifier()),
                 JocksClass.class);
 
         final var instance = invoked.createInstance();
 
         final var initMethod = invoked.getMethod("__init__").orElseThrow();
-        if (initMethod.getArity() != expression.getArguments().size() + 1) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Number of parameters does not match number of arguments provided.");
+        final var initArity  = initMethod.getArity();
+        final var exprArity  = expression.getArguments().size() + 1; // Leading instance parameter - implicitly passed.
+        if (initArity != exprArity) {
+            throw createException(
+                    "Interpreter",
+                    expression.getFile(),
+                    expression.getLine(),
+                    String.format("Number of parameters (%d) did not match what was expected (%d)", initArity, exprArity));
         }
 
         final var argumentResults = new ArrayList<JocksValue>();
@@ -350,16 +377,15 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public JocksValue visitVarAssignment(VarAssignment expression) {
         final var rhsResult = visit(expression.getRhsExpression());
         if (expression.getLhsExpression() instanceof DotExpression lhsDotExpression) {
-            final var instance = JocksValue.cast(visit(lhsDotExpression.getLhsExpression()), JocksInstance.class);
+            final var instance = JocksValue.cast(
+                    visit(lhsDotExpression.getLhsExpression()),
+                    JocksInstance.class);
             final var property = lhsDotExpression.getRhsIdentifier().getText();
-            instance.setProperty(
-                    property,
-                    rhsResult);
+            instance.setProperty(property, rhsResult);
         } else if (expression.getLhsExpression() instanceof VarExpression lhsVarExpression) {
-            final var identifier = lhsVarExpression.getIdentifier().getText();
             _symbolTable
                     .getAncestor(expression.getSymbolTableDepth())
-                    .setVariable(identifier, rhsResult);
+                    .setVariable(lhsVarExpression.getIdentifier(), rhsResult);
         }
 
         return rhsResult;
@@ -369,19 +395,23 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public JocksValue visitVarExpression(VarExpression expression) {
         return _symbolTable
                 .getAncestor(expression.getSymbolTableDepth())
-                .getVariable(expression.getIdentifier().getText());
+                .getVariable(expression.getIdentifier());
     }
 
     @Override
     public JocksValue visitLiteralExpression(LiteralExpression expression) {
-        final var literalType = expression.getToken().getType();
-        return switch (literalType) {
+        final var literalToken = expression.getToken();
+        return switch (literalToken.getType()) {
             case TokenType.STRING -> new JocksString((String)expression.getToken().getLiteral());
             case TokenType.NUMBER -> new JocksNumber((Double)expression.getToken().getLiteral());
             case TokenType.TRUE  -> JocksBool.Truthy;
             case TokenType.FALSE -> JocksBool.Falsey;
             case TokenType.NIL -> JocksNil.Instance;
-            default -> throw new IllegalStateException("Invalid literal type '" + literalType.name() + "'.");
+            default -> throw createException(
+                    "Interpreter",
+                    literalToken.getFile(),
+                    literalToken.getLine(),
+                    "Invalid literal type '" + literalToken.getType().name() + "'");
         };
     }
 
@@ -393,12 +423,46 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         _symbolTable = symbolTable;
     }
 
+    private static Token createInternalIdentifier(String identifier) {
+        // TODO - Revisit this mechanism.
+        //        I like keeping the SymbolTable interface clean, but making tokens here
+        //        instead of during parse time feels wrong. Perhaps what I need to do is
+        //        have the builtin functions and classes return a token for their identifier.
+        return new Token(TokenType.IDENTIFIER, null, identifier, "", -1);
+    }
+
+    private void registerInternalVariable(String identifier, JocksValue value) {
+        _symbolTable.createVariable(createInternalIdentifier(identifier), value);
+    }
+
     private JocksFunction funDeclarationToJocksFunction(FunDeclaration statement) {
         return new JocksUserLandFunction(
-                statement.getParameters().stream().map(Token::getText).toList(),
+                statement.getParameters(),
                 statement.getStatements(),
                 _symbolTable,
                 this);
+    }
+
+    private Optional<JocksValue> findPropertyOrMethod(JocksInstance instance, String propertyOrMethodName) {
+        final var property = instance.getProperty(propertyOrMethodName);
+        return property.or(() -> findMethod(instance, propertyOrMethodName));
+    }
+
+    private Optional<JocksFunction> findMethod(JocksInstance instance, String methodName) {
+        return findMethod(instance.getClassName(), methodName)
+                .map((method) -> new BoundMethod(instance, method));
+    }
+
+    private Optional<JocksFunction> findMethod(JocksClass jClass, String methodName) {
+        return findMethod(jClass.getIdentifier(), methodName);
+    }
+
+    private Optional<JocksFunction> findMethod(Token className, String methodName) {
+        final var jClass = JocksValue.cast(_symbolTable.getVariable(className), JocksClass.class);
+        return jClass.getIdentifier().equals(jClass.getSuperClass())
+                ? jClass.getMethod(methodName)
+                : jClass.getMethod(methodName)
+                    .or(() -> findMethod(jClass.getSuperClass(), methodName));
     }
 
     private void pushSymbolTable() {

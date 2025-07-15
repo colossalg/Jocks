@@ -1,26 +1,20 @@
 package com.colossalg.visitors;
 
+import com.colossalg.ErrorReporter;
+import com.colossalg.JocksError;
 import com.colossalg.Token;
 import com.colossalg.expression.*;
 import com.colossalg.statement.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
-
-// TODO - Variable assignment should take an expression for the LHS rather than a token
-//        to facilitate setting properties. Then the resolver should have state for
-//        maintaining whether we are currenly in the LHS of an assignment and
-//        prevent the use of things such as 'new'.
-//
-//        This should be legal:
-//          (foo.bar())(baz).someProp = someVal;
-//
-//        This should be illegal:
-//          (new Foo()).bar = baz
 
 public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void> {
 
-    public Resolver() {
+    public Resolver(ErrorReporter errorReporter) {
+        _errorReporter = errorReporter;
+
         begScope(); // Global scope
 
         // Type checking
@@ -40,15 +34,24 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         declareAndDefine("Object");
     }
 
+    public void visitAll(List<Statement> statements) {
+        for (final var statement : statements) {
+            visit(statement);
+        }
+    }
+
     public Void visit(Statement statement) {
         return statement.accept(this);
     }
 
     public Void visitClassDeclaration(ClassDeclaration statement) {
         if (_scopes.size() != 1) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Class declarations must be at the global scope.");
+            _errorReporter.report(
+                    new JocksError(
+                        "Resolver",
+                        statement.getFile(),
+                        statement.getLine(),
+                        "Class declaration must be at the global scope"));
         }
 
         declareAndDefine(statement.getIdentifier());
@@ -62,13 +65,11 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
 
         begScope();
         declareAndDefine("super");
-        _isWithinClass = true;
 
         for (final var method : statement.getMethods()) {
             visitFunDeclarationBody(method);
         }
 
-        _isWithinClass = false;
         endScope();
 
         return null;
@@ -127,9 +128,12 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
 
     public Void visitReturnStatement(ReturnStatement statement) {
         if (!_isWithinFun) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Return may only be used within a function.");
+            _errorReporter.report(
+                    new JocksError(
+                            "Resolver",
+                            statement.getFile(),
+                            statement.getLine(),
+                            "Return statement must be within function scope"));
         }
         visitIfNotNull(statement.getSubExpression().orElse(null));
 
@@ -290,21 +294,27 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
             final var scope = _scopes.get(_scopes.size() - 1 - i);
             if (scope.containsKey(token.getText())) {
                 if (!scope.get(token.getText())) {
-                    // TODO - Need to suss out how to actually handle run time errors.
-                    //        Need a way to throw/catch errors within the language itself.
-                    throw new IllegalStateException("Attempting to reference undefined variable.");
-                } else {
-                    return i;
+                    _errorReporter.report(
+                            new JocksError(
+                                    "Resolver",
+                                    token.getFile(),
+                                    token.getLine(),
+                                    "Attempting to reference undefined variable"));
                 }
+                return i;
             }
         }
 
-        // TODO - Need to suss out how to actually handle run time errors.
-        //        Need a way to throw/catch errors within the language itself.
-        throw new IllegalStateException("Attempting to reference undeclared variable.");
+        _errorReporter.report(
+                new JocksError(
+                        "Resolver",
+                        token.getFile(),
+                        token.getLine(),
+                        "Attempting to reference undeclared variable"));
+        return -1;
     }
 
-    private boolean _isWithinClass = false;
+    private final ErrorReporter _errorReporter;
     private boolean _isWithinFun = false;
     private final Stack<HashMap<String, Boolean>> _scopes = new Stack<>();
 }

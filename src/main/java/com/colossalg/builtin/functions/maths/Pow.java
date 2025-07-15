@@ -16,9 +16,7 @@ public class Pow extends JocksJavaLandFunction {
     @Override
     public JocksValue call(List<JocksValue> arguments) {
         if (!(arguments.get(0) instanceof JocksNumber x) || !(arguments.get(1) instanceof JocksNumber y)) {
-            // TODO - Need to suss out how to actually handle run time errors.
-            //        Need a way to throw/catch errors within the language itself.
-            throw new IllegalStateException("Arguments are expected to both be of type JocksNumber.");
+            throw new IllegalStateException("Pow expects arguments to both be of type JocksNumber.");
         }
 
         return new JocksNumber(Math.pow(x.getData(), y.getData()));

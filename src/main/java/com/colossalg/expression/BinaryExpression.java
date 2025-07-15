@@ -2,9 +2,16 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class BinaryExpression implements Expression {
+public class BinaryExpression extends Expression {
 
-    public BinaryExpression(Token operator, Expression lftSubExpression, Expression rgtSubExpression) {
+    public BinaryExpression(
+            String file,
+            int line,
+            Token operator,
+            Expression lftSubExpression,
+            Expression rgtSubExpression
+    ) {
+        super(file, line);
         _operator = operator;
         _lftSubExpression = lftSubExpression;
         _rgtSubExpression = rgtSubExpression;

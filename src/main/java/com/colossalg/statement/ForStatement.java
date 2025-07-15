@@ -4,9 +4,17 @@ import com.colossalg.expression.Expression;
 
 import java.util.Optional;
 
-public class ForStatement implements Statement {
+public class ForStatement extends Statement {
 
-    public ForStatement(Statement initializer, Expression condition, Expression increment, Statement subStatement) {
+    public ForStatement(
+            String file,
+            int line,
+            Statement initializer,
+            Expression condition,
+            Expression increment,
+            Statement subStatement
+    ) {
+        super(file, line);
         _initializer = initializer;
         _condition = condition;
         _increment = increment;
