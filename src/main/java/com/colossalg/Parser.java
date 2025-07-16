@@ -52,10 +52,31 @@ public class Parser {
                 return parseNonDeclarationStatement();
             }
         } catch (ParserException ex) {
-            // TODO - synchronize();
-            System.out.print("TODO - Synchronize not currently implemented.");
-            System.exit(1);
+            synchronize();
             return null;
+        }
+    }
+
+    private void synchronize() {
+        _index++;
+        while (isNotAtEnd()) {
+            if (match(TokenType.SEMICOLON)) {
+                _index++;
+                break;
+            } else if (match(
+                    TokenType.CLASS,
+                    TokenType.FUN,
+                    TokenType.VAR,
+                    TokenType.IF,
+                    TokenType.WHILE,
+                    TokenType.FOR,
+                    TokenType.PRINT,
+                    TokenType.RETURN
+            )) {
+                break;
+            } else {
+                _index++;
+            }
         }
     }
 
