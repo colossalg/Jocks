@@ -36,3 +36,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Test files ###
+/test/*.source
+/test/*.expect
+/test/*.result
+/test/*.html

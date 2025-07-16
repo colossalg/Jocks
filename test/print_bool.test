@@ -1,0 +1,5 @@
+print true;
+print false;
+---* EXPECT *---
+true
+false

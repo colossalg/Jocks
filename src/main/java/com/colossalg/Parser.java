@@ -52,8 +52,31 @@ public class Parser {
                 return parseNonDeclarationStatement();
             }
         } catch (ParserException ex) {
-            // TODO - synchronize();
+            synchronize();
             return null;
+        }
+    }
+
+    private void synchronize() {
+        _index++;
+        while (isNotAtEnd()) {
+            if (match(TokenType.SEMICOLON)) {
+                _index++;
+                break;
+            } else if (match(
+                    TokenType.CLASS,
+                    TokenType.FUN,
+                    TokenType.VAR,
+                    TokenType.IF,
+                    TokenType.WHILE,
+                    TokenType.FOR,
+                    TokenType.PRINT,
+                    TokenType.RETURN
+            )) {
+                break;
+            } else {
+                _index++;
+            }
         }
     }
 
@@ -524,12 +547,6 @@ public class Parser {
 
     private Token peek() {
         return _tokens.get(_index);
-    }
-
-    private Token peekNext() {
-        return isNotAtEnd()
-                ? _tokens.get(_index + 1)
-                : _tokens.getLast(); // EOF always
     }
 
     private final ErrorReporter _errorReporter;

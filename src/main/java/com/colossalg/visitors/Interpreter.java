@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<JocksValue> {
 
     public static IllegalStateException createException(String module, String file, int line, String what) {
-        return new IllegalStateException(String.format("[Interpreter] - (%s:%d) - %s.", file, line, what));
+        return new IllegalStateException(String.format("[%s] - (%s:%d) - %s.", module, file, line, what));
     }
 
     public Interpreter() {
@@ -135,11 +135,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitWhileStatement(WhileStatement statement) {
         // Helper lambda to evaluate condition, checking that type is JocksBool, etc.
-        final Supplier<JocksBool> evaluateCondition = () -> {
-            return JocksValue.cast(
-                    visit(statement.getCondition()),
-                    JocksBool.class);
-        };
+        final Supplier<JocksBool> evaluateCondition = () -> JocksValue.cast(
+                visit(statement.getCondition()),
+                JocksBool.class);
 
         while (evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
@@ -384,7 +382,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             instance.setProperty(property, rhsResult);
         } else if (expression.getLhsExpression() instanceof VarExpression lhsVarExpression) {
             _symbolTable
-                    .getAncestor(expression.getSymbolTableDepth())
+                    .getAncestor(lhsVarExpression.getSymbolTableDepth())
                     .setVariable(lhsVarExpression.getIdentifier(), rhsResult);
         }
 

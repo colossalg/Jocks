@@ -32,10 +32,6 @@ public class JocksClass extends JocksValue {
         return _superClass;
     }
 
-    public HashMap<String, JocksFunction> getMethods() {
-        return _methods;
-    }
-
     public Optional<JocksFunction> getMethod(String identifier) {
         return Optional.ofNullable(
                 _methods.getOrDefault(identifier, null));
