@@ -1,36 +1,116 @@
-import glob
 import os
+import pathlib
 import subprocess
+import webbrowser
 
-def write_html_beg(html_file):
-    html_file.write(
+
+class Test:
+    def __init__(self, test_file_path):
+        self.test_file_path = test_file_path
+        self.name = test_file_path.stem
+        self.passed = False
+
+    def get_source_file_path(self):
+        return self.test_file_path.with_suffix('.source')
+
+    def get_expect_file_path(self):
+        return self.test_file_path.with_suffix('.expect')
+
+    def get_result_file_path(self):
+        return self.test_file_path.with_suffix('.result')
+
+
+def create_html_row_for_test(test):
+    if test.passed:
+        return f'''
+            <tr class="pass-row">
+                <th>{test.name}</th>
+                <th>Pass</th>
+                <th>N/A</th>
+            </tr>
         '''
-            <html>
-                <head>
-                    <style>
-                        * {
-                            box-sizing: border-box;
-                            margin: 0px;
-                            padding: 0px;
-                        }
+    else:
+        return f'''
+            <tr class="fail-row">
+                <th>{test.name}</th>
+                <th>Fail</th>
+                <th>
+                    <ul>
+                        <li><a href="{test.get_source_file_path()}">{test.get_source_file_path()}</li>
+                        <li><a href="{test.get_expect_file_path()}">{test.get_expect_file_path()}</li>
+                        <li><a href="{test.get_result_file_path()}">{test.get_result_file_path()}</li>
+                    </ul>
+                </th>
+            </tr>
+        '''
 
-                        th {
-                            padding: 5px;
-                            text-align: left;
-                            vertical-align: middle;
-                        }
+def create_and_view_html_results(tests):
+    rows = ''
+    for test in tests:
+        rows += create_html_row_for_test(test)
+    html = f'''
+        <html>
+            <head>
+                <style>
+                    * {{
+                        box-sizing: border-box;
+                        margin: 0px;
+                        padding: 0px;
+                        font-family: sans-serif;
+                    }}
 
-                        .failure-text {
-                            color: red;
-                        }
+                    body {{
+                        background-color: lightgrey;
+                    }}
 
-                        ul {
-                            list-style-position: inside;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <table border="1">
+                    #container {{
+                        margin: 20px auto;
+                        padding: 10px;
+                        width: 80%;
+                        background-color: white;
+                        border: 1px solid black;
+                    }}
+
+                    #title {{
+                        margin-bottom: 20px;
+                    }}
+
+                    #total {{
+                        margin-bottom: 10px;
+                    }}
+
+                    #results-table {{
+                        width: 100%;
+                    }}
+
+                    #results-table thead th {{
+                        background-color: lightblue;
+                    }}
+
+                    #results-table th {{
+                        padding: 5px;
+                        text-align: left;
+                        vertical-align: middle;
+                    }}
+
+                    #results-table ul {{
+                        list-style-position: inside;
+                    }}
+
+                    .pass-row {{
+                        background-color: olivedrab;
+                    }}
+
+                    .fail-row {{
+                        background-color: orangered;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div id="container">
+                    <h1 id="title">Test Results</h1>
+                    <h3 id="total">{sum(1 for test in tests if not test.passed)} of {len(tests)} tests failed.</h3>
+                    <table id="results-table" border="1">
                         <thead>
                             <tr>
                                 <th>Test Name</th>
@@ -39,51 +119,21 @@ def write_html_beg(html_file):
                             </tr>
                         </thead>
                         <tbody>
-        '''
-    )
-
-def write_html_test_pass(html_file, test_file_name):
-    html_file.write(
-        f'''
-            <tr>
-                <th>{test_file_name}</th>
-                <th>Pass</th>
-                <th></th>
-            </tr>
-        '''
-    )
-
-def write_html_test_fail(html_file, test_file_name, source_file_name, expect_file_name, result_file_name):
-    html_file.write(
-        f'''
-            <tr class='failure-text'>
-                <th>{test_file_name}</th>
-                <th>Fail</th>
-                <th>
-                    <ul>
-                        <li><a href="./{source_file_name}">./{source_file_name}</li>
-                        <li><a href="./{expect_file_name}">./{expect_file_name}</li>
-                        <li><a href="./{result_file_name}">./{result_file_name}</li>
-                    </ul>
-                </th>
-            </tr>
-        '''
-    )
-
-def write_html_end(html_file):
-    html_file.write(
-        '''
+                            {rows}
                         </tbody>
                     </table>
-                </body>
-            </html>
-        '''
-    )
+                </div>
+            </body>
+        </html>
+    '''
+    html_file_path = get_cwd() / 'results.html'
+    write_to_file(html_file_path, html)
+    webbrowser.open(html_file_path)
 
-def get_source_and_expect(test_file_name):
+def extract_source_and_expect(test_file_path):
         source = ''
         expect = ''
-        with open(test_file_name, 'r') as test_file:
+        with open(test_file_path, 'r') as test_file:
             hasReadExpect = False
             for line in test_file:
                 if line == '---* EXPECT *---\n':
@@ -95,44 +145,44 @@ def get_source_and_expect(test_file_name):
                     expect += line
         return (source, expect)
 
-def get_output(source_file_name):
-        jvm = 'C:\\Users\\angus\\.jdks\\openjdk-24.0.1\\bin\\java.exe'
+def run_jocks_and_get_output(source_file_path):
+        jvm = 'C:\\Users\\angus\\.jdks\\openjdk-24.0.1\\bin\\java.exe' # Requires changing if JDK moves
         return subprocess.run(
-            [jvm, '-cp', '..\\target\\classes\\', 'com.colossalg.Jocks', source_file_name],
+            [jvm, '-cp', get_cwd() / '../target/classes/', 'com.colossalg.Jocks', source_file_path],
             capture_output=True,
             text=True
         ).stdout
 
+def get_cwd():
+    return pathlib.Path(__file__).resolve().parent
+
+def write_to_file(file_path, content):
+    with open(file_path, 'w') as file:
+        file.write(content)
+
+def remove_files_if_exist(file_paths):
+    for file_path in file_paths:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
 def run_tests():
-
-    html_file = open('test_results.html', 'w')
-    write_html_beg(html_file)
-
-    for test_file_name in glob.glob('*.test'):
-        source, expect = get_source_and_expect(test_file_name)
-
-        source_file_name = test_file_name + '.source'
-        with open(source_file_name, 'w') as source_file:
-            source_file.write(source)
-
-        result = get_output(source_file_name)
-
-        expect_file_name = test_file_name + '.expect'
-        result_file_name = test_file_name + '.result'
+    tests = [Test(test_file_path) for test_file_path in get_cwd().glob('*.test')]
+    for test in tests:
+        source, expect = extract_source_and_expect(test.test_file_path)
+        write_to_file(test.get_source_file_path(), source)
+        result = run_jocks_and_get_output(test.get_source_file_path())
         if result == expect:
-            write_html_test_pass(html_file, test_file_name)
-            for file_name in [source_file_name, expect_file_name, result_file_name]:
-                if os.path.exists(file_name):
-                    os.remove(file_name)
+            test.passed = True
+            remove_files_if_exist([
+                test.get_source_file_path(),
+                test.get_expect_file_path(),
+                test.get_result_file_path()
+            ])
         else:
-            write_html_test_fail(html_file, test_file_name, source_file_name, expect_file_name, result_file_name)
-            with open(expect_file_name, 'w') as expect_file:
-                expect_file.write(expect)
-            with open(result_file_name, 'w') as result_file:
-                result_file.write(result)
-    
-    write_html_end(html_file)
-    html_file.close()
+            test.passed = False
+            write_to_file(test.get_expect_file_path(), expect)
+            write_to_file(test.get_result_file_path(), result)
+    create_and_view_html_results(tests)
 
 
 if __name__ == '__main__':
