@@ -53,6 +53,8 @@ public class Parser {
             }
         } catch (ParserException ex) {
             // TODO - synchronize();
+            System.out.print("TODO - Synchronize not currently implemented.");
+            System.exit(1);
             return null;
         }
     }

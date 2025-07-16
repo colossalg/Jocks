@@ -1,0 +1,6 @@
+class Dummy {
+    # Empty
+}
+print Dummy;
+---* EXPECT *---
+JocksClass(Dummy)

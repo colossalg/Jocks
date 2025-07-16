@@ -1,6 +1,7 @@
 import os
 import pathlib
 import subprocess
+import sys
 import webbrowser
 
 
@@ -36,9 +37,9 @@ def create_html_row_for_test(test):
                 <th>Fail</th>
                 <th>
                     <ul>
-                        <li><a href="{test.get_source_file_path()}">{test.get_source_file_path()}</li>
-                        <li><a href="{test.get_expect_file_path()}">{test.get_expect_file_path()}</li>
-                        <li><a href="{test.get_result_file_path()}">{test.get_result_file_path()}</li>
+                        <li><a href="{test.get_source_file_path()}">{test.get_source_file_path()}</a></li>
+                        <li><a href="{test.get_expect_file_path()}">{test.get_expect_file_path()}</a></li>
+                        <li><a href="{test.get_result_file_path()}">{test.get_result_file_path()}</a></li>
                     </ul>
                 </th>
             </tr>
@@ -67,7 +68,7 @@ def create_and_view_html_results(tests):
                         margin: 20px auto;
                         padding: 10px;
                         width: 80%;
-                        background-color: white;
+                        background-color: burlywood;
                         border: 1px solid black;
                     }}
 
@@ -184,6 +185,21 @@ def run_tests():
             write_to_file(test.get_result_file_path(), result)
     create_and_view_html_results(tests)
 
+def clean():
+    to_remove = (
+        list(get_cwd().glob('*.html')) +
+        list(get_cwd().glob('*.source')) +
+        list(get_cwd().glob('*.expect')) +
+        list(get_cwd().glob('*.result'))
+    )
+    remove_files_if_exist(to_remove)
 
 if __name__ == '__main__':
-    run_tests()
+    match sys.argv[1:]:
+        case []:
+            run_tests()
+        case ['--clean']:
+            clean()
+        case _:
+            print('USAGE:')
+            print('    python test_runner.py [--clean]')

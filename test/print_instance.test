@@ -1,0 +1,14 @@
+class Point {
+    fun __init__(self, x, y) {
+        self.x = x;
+        self.y = y;
+    }
+
+    fun __str__(self) {
+        return "Point(" + to_string(x) + "," + to_string(y) + ")";
+    }
+}
+var p = new Point(1, 2);
+print p;
+---* EXPECT *---
+Point(1,2)

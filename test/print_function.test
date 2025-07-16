@@ -1,0 +1,8 @@
+fun dummy() {
+    # Empty
+}
+print dummy;
+print isNil;
+---* EXPECT *---
+JocksUserLandFunction(dummy)
+JocksBuiltinFunction(isNil)

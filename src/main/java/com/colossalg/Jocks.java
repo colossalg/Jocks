@@ -13,7 +13,7 @@ public class Jocks {
 
         final var stringBuilder = new StringBuilder();
         try {
-            final var reader = new BufferedReader(new FileReader("D:\\Jocks\\test\\classes.jocks"));
+            final var reader = new BufferedReader(new FileReader(args[0]));
             String line = reader.readLine();
             while (line != null) {
                 stringBuilder.append(line);
@@ -43,6 +43,7 @@ public class Jocks {
             return;
         }
 
+        /*
         System.out.println();
         System.out.println("*".repeat(80));
         System.out.println("Pretty Printing");
@@ -61,6 +62,7 @@ public class Jocks {
         System.out.println();
 
         final var begTime = System.nanoTime();
+        */
 
         final var resolver = new Resolver(errorReporter);
         resolver.visitAll(statements);
@@ -79,6 +81,7 @@ public class Jocks {
             return;
         }
 
+        /*
         final var endTime = System.nanoTime();
         final var runTime = (endTime - begTime) / 1_000_000;
 
@@ -89,5 +92,6 @@ public class Jocks {
         System.out.println();
 
         System.out.printf("Total run time: %d ms.\n", runTime);
+        */
     }
 }

@@ -12,7 +12,7 @@ public abstract class JocksValue {
     }
 
     public String str() {
-        return getClass().getName();
+        return getClass().getSimpleName();
     }
 
     public JocksBool equal(JocksValue other) {
