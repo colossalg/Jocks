@@ -1,7 +1,6 @@
 package com.colossalg;
 
 import com.colossalg.visitors.Interpreter;
-import com.colossalg.visitors.PrettyPrinter;
 import com.colossalg.visitors.Resolver;
 
 import java.io.*;
@@ -21,7 +20,7 @@ public class Jocks {
                 line = reader.readLine();
             }
         } catch (IOException exception) {
-            System.out.println("Couldn't read file.");
+            System.out.println("ERROR - Couldn't read file.");
             return;
         }
 
@@ -43,27 +42,6 @@ public class Jocks {
             return;
         }
 
-        /*
-        System.out.println();
-        System.out.println("*".repeat(80));
-        System.out.println("Pretty Printing");
-        System.out.println("*".repeat(80));
-        System.out.println();
-
-        final var prettyPrinter = new PrettyPrinter();
-        for (final var statement : statements) {
-            System.out.print(prettyPrinter.visit(statement));
-        }
-
-        System.out.println();
-        System.out.println("*".repeat(80));
-        System.out.println("Resolving & Interpreting");
-        System.out.println("*".repeat(80));
-        System.out.println();
-
-        final var begTime = System.nanoTime();
-        */
-
         final var resolver = new Resolver(errorReporter);
         resolver.visitAll(statements);
         if (!errorReporter.getErrors().isEmpty()) {
@@ -78,20 +56,6 @@ public class Jocks {
             interpreter.visitAll(statements);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return;
         }
-
-        /*
-        final var endTime = System.nanoTime();
-        final var runTime = (endTime - begTime) / 1_000_000;
-
-        System.out.println();
-        System.out.println("*".repeat(80));
-        System.out.println("Time");
-        System.out.println("*".repeat(80));
-        System.out.println();
-
-        System.out.printf("Total run time: %d ms.\n", runTime);
-        */
     }
 }
