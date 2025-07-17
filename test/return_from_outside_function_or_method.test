@@ -1,0 +1,5 @@
+{
+    return;
+}
+---* EXPECT *---
+[Resolver] - (:2) - Return statement must be within function scope

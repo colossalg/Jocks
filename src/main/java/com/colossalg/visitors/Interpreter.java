@@ -65,6 +65,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public void visitAll(List<Statement> statements) {
         for (final var statement : statements) {
             visit(statement);
+            if (_isReturning) {
+                break;
+            }
         }
     }
 
@@ -141,6 +144,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
         while (evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
+            if (_isReturning) {
+                break;
+            }
         }
 
         return null;
@@ -165,6 +171,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         }
         while (evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
+            if (_isReturning) {
+                break;
+            }
             if (statement.getIncrement().isPresent()) {
                 visit(statement.getIncrement().get());
             }
@@ -177,9 +186,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitBlockStatement(BlockStatement statement) {
         pushSymbolTable();
-        for (final var subStatement : statement.getSubStatements()) {
-            visit(subStatement);
-        }
+        visitAll(statement.getSubStatements());
         popSymbolTable();
 
         return null;
@@ -187,13 +194,11 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitReturnStatement(ReturnStatement statement) {
-        // TODO - This currently doesn't support return statements which are
-        //        a child of another statement (if / while / for / block).
-        throw createException(
-                "Interpreter",
-                statement.getFile(),
-                statement.getLine(),
-                "Can't directly evaluate return statement");
+        _returnValue = statement.getSubExpression().isPresent()
+                ? visit(statement.getSubExpression().get())
+                : JocksNil.Instance;
+        _isReturning = true;
+        return null;
     }
 
     @Override
@@ -413,12 +418,26 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         };
     }
 
-    public SymbolTable getSymbolTable() {
-        return _symbolTable;
-    }
+    public JocksValue executeUserLandFunction(JocksUserLandFunction function, List<JocksValue> arguments) {
+        final var oldSymbolTable = _symbolTable;
+        final var newSymbolTable = new SymbolTable(function.getSymbolTable());
 
-    public void setSymbolTable(SymbolTable symbolTable) {
-        _symbolTable = symbolTable;
+        _symbolTable = newSymbolTable;
+        _returnValue = JocksNil.Instance;
+        _isReturning = false;
+
+        for (int i = 0; i < function.getParameters().size(); i++) {
+            _symbolTable.createVariable(function.getParameters().get(i), arguments.get(i));
+        }
+
+        visitAll(function.getStatements());
+        final var result = _returnValue;
+
+        _symbolTable = oldSymbolTable;
+        _returnValue = JocksNil.Instance;
+        _isReturning = false;
+
+        return result;
     }
 
     private static Token createInternalIdentifier(String identifier) {
@@ -472,4 +491,6 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     }
 
     private SymbolTable _symbolTable = new SymbolTable(null);
+    private JocksValue _returnValue = JocksNil.Instance;
+    private boolean _isReturning = false;
 }
