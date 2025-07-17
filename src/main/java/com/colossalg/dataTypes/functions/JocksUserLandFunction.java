@@ -2,8 +2,6 @@ package com.colossalg.dataTypes.functions;
 
 import com.colossalg.Token;
 import com.colossalg.dataTypes.JocksValue;
-import com.colossalg.dataTypes.primitives.JocksNil;
-import com.colossalg.statement.ReturnStatement;
 import com.colossalg.statement.Statement;
 import com.colossalg.visitors.Interpreter;
 import com.colossalg.visitors.SymbolTable;

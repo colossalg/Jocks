@@ -420,6 +420,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     public JocksValue executeUserLandFunction(JocksUserLandFunction function, List<JocksValue> arguments) {
         final var oldSymbolTable = _symbolTable;
+        @SuppressWarnings("UnnecessaryLocalVariable") // I prefer the consistency afforded below by this.
         final var newSymbolTable = new SymbolTable(function.getSymbolTable());
 
         _symbolTable = newSymbolTable;
