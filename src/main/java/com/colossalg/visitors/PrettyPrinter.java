@@ -211,6 +211,7 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
 
     @Override
     public String visitDotExpression(DotExpression expression) {
+        @SuppressWarnings("StringBufferReplaceableByString") // I prefer the consistency with the other methods.
         final var stringBuilder = new StringBuilder();
         stringBuilder.append(visit(expression.getLhsExpression()));
         stringBuilder.append('.');

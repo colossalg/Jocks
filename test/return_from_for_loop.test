@@ -1,0 +1,16 @@
+fun foo() {
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i >= 5) {
+            return;
+        }
+        print i;
+    }
+    print "This should not print";
+}
+foo();
+---* EXPECT *---
+0.0
+1.0
+2.0
+3.0
+4.0

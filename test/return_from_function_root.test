@@ -1,0 +1,7 @@
+fun foo() {
+    return "bar";
+    print "This should not print.";
+}
+print foo();
+---* EXPECT *---
+bar

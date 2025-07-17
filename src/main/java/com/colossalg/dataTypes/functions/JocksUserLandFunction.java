@@ -2,8 +2,6 @@ package com.colossalg.dataTypes.functions;
 
 import com.colossalg.Token;
 import com.colossalg.dataTypes.JocksValue;
-import com.colossalg.dataTypes.primitives.JocksNil;
-import com.colossalg.statement.ReturnStatement;
 import com.colossalg.statement.Statement;
 import com.colossalg.visitors.Interpreter;
 import com.colossalg.visitors.SymbolTable;
@@ -31,29 +29,19 @@ public class JocksUserLandFunction extends JocksFunction {
 
     @Override
     public JocksValue call(List<JocksValue> arguments) {
-        final var oldSymbolTable = _interpreter.getSymbolTable();
-        _interpreter.setSymbolTable(new SymbolTable(_symbolTable));
+        return _interpreter.executeUserLandFunction(this, arguments);
+    }
 
-        for (int i = 0; i < _parameters.size(); i++) {
-            _interpreter.getSymbolTable().createVariable(_parameters.get(i), arguments.get(i));
-        }
+    public List<Token> getParameters() {
+        return _parameters;
+    }
 
-        JocksValue result = JocksNil.Instance;
-        for (final var statement : _statements) {
-            // TODO - This currently doesn't support return statements which are
-            //        a child of another statement (if / while / for / block).
-            if (statement instanceof ReturnStatement returnStatement) {
-                if (returnStatement.getSubExpression().isPresent()) {
-                    result = _interpreter.visit(returnStatement.getSubExpression().get());
-                }
-            } else {
-                _interpreter.visit(statement);
-            }
-        }
+    public List<Statement> getStatements() {
+        return _statements;
+    }
 
-        _interpreter.setSymbolTable(oldSymbolTable);
-
-        return result;
+    public SymbolTable getSymbolTable() {
+        return _symbolTable;
     }
 
     // TODO - Revisit this decision.
