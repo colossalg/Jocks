@@ -14,7 +14,6 @@ import com.colossalg.statement.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<JocksValue> {
@@ -37,29 +36,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         registerInternalVariable("floor", new Floor());
         registerInternalVariable("pow", new Pow());
 
+        // Strings
+        registerInternalVariable("to_string", new ToString());
+
         // Global Object class which all other classes are descendants of.
-        // TODO - I need to have a little bit more of a think here.
-        //        I've made all classes and store their super classes as a string.
-        //        This simplifies some things a bit:
-        //            - It means all classes are guaranteed to have a super class.
-        //              The root "Object" class can refer to itself trivially. It
-        //              would be possible if an object reference were used instead,
-        //              but an additional setter would be required for the super
-        //              class as I don't think it's possible to point to itself
-        //              in the constructor (without some hacky check for "Object").
-        //            - Resolving of the classes becomes trivial.
-        //        There are some significant drawbacks, however:
-        //            - Classes become dynamically scoped. This is partially
-        //              resolved by restricting them to being declared at the
-        //              global scope, but that itself is a trade-off.
-        //            - It's going to be slower to look the super classes up by
-        //              name rather than accessing them through an object reference.
         registerInternalVariable(
                 "Object",
-                new JocksClass(
-                        createInternalIdentifier("Object"),
-                        createInternalIdentifier("Object"),
-                        new HashMap<>()));
+                new JocksClass(createInternalIdentifier("Object"), null, new HashMap<>()));
     }
 
     public void visitAll(List<Statement> statements) {
@@ -79,13 +62,17 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitClassDeclaration(ClassDeclaration statement) {
         final var identifier = statement.getIdentifier();
-        final var superClass = statement.getSuperClass()
-                .orElse(createInternalIdentifier("Object"));
+        final var superClass = JocksValue.cast(
+                _symbolTable.getVariable(
+                        statement
+                                .getSuperClass()
+                                .orElse(createInternalIdentifier("Object"))),
+                JocksClass.class);
 
         pushSymbolTable();
         _symbolTable.createVariable(
                 createInternalIdentifier("super"),
-                _symbolTable.getVariable(superClass));
+                _symbolTable.getVariable(superClass.getIdentifier()));
 
         final var methods = new HashMap<String, JocksFunction>();
         for (final var methodDeclaration : statement.getMethods()) {
@@ -296,7 +283,10 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var rhsIdentifier = expression.getRhsIdentifier();
 
         if ((lhsExpressionResult instanceof JocksInstance instance)) {
-            return findPropertyOrMethod(instance, rhsIdentifier.getText())
+            // Return the property if it exists, otherwise return the method if it exists.
+            return instance
+                    .getProperty(rhsIdentifier.getText())
+                    .or(() -> instance.getMethod(rhsIdentifier.getText()))
                     .orElseThrow(() -> createException(
                             "Interpreter",
                             rhsIdentifier.getFile(),
@@ -305,7 +295,8 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         }
 
         if ((lhsExpressionResult instanceof JocksClass jClass)) {
-            return findMethod(jClass, rhsIdentifier.getText())
+            // Return the method if it exists.
+            return jClass.getMethodRecursive(rhsIdentifier.getText())
                     .orElseThrow(() -> createException(
                             "Interpreter",
                             rhsIdentifier.getFile(),
@@ -459,28 +450,6 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                 statement.getStatements(),
                 _symbolTable,
                 this);
-    }
-
-    private Optional<JocksValue> findPropertyOrMethod(JocksInstance instance, String propertyOrMethodName) {
-        final var property = instance.getProperty(propertyOrMethodName);
-        return property.or(() -> findMethod(instance, propertyOrMethodName));
-    }
-
-    private Optional<JocksFunction> findMethod(JocksInstance instance, String methodName) {
-        return findMethod(instance.getClassName(), methodName)
-                .map((method) -> new BoundMethod(instance, method));
-    }
-
-    private Optional<JocksFunction> findMethod(JocksClass jClass, String methodName) {
-        return findMethod(jClass.getIdentifier(), methodName);
-    }
-
-    private Optional<JocksFunction> findMethod(Token className, String methodName) {
-        final var jClass = JocksValue.cast(_symbolTable.getVariable(className), JocksClass.class);
-        return jClass.getIdentifier().equals(jClass.getSuperClass())
-                ? jClass.getMethod(methodName)
-                : jClass.getMethod(methodName)
-                    .or(() -> findMethod(jClass.getSuperClass(), methodName));
     }
 
     private void pushSymbolTable() {

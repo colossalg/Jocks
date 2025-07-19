@@ -1,19 +1,28 @@
 package com.colossalg.dataTypes.classes;
 
-import com.colossalg.Token;
+import com.colossalg.builtin.functions.BoundMethod;
 import com.colossalg.dataTypes.JocksValue;
+import com.colossalg.dataTypes.functions.JocksFunction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
 public class JocksInstance extends JocksValue {
 
-    public JocksInstance(Token className) {
-        _className = className;
+    public JocksInstance(JocksClass jClass) {
+        _class = jClass;
     }
 
-    public Token getClassName() {
-        return _className;
+    @Override
+    public String str() {
+        final var strMethod = getMethod("__str__")
+                .map((method) -> JocksValue.cast(method, JocksFunction.class));
+        if (strMethod.isPresent()) {
+            return strMethod.get().call(new ArrayList<>()).str();
+        } else {
+            return String.format("Instance(%s)", _class.getIdentifier().getText());
+        }
     }
 
     public Optional<JocksValue> getProperty(String identifier) {
@@ -25,18 +34,11 @@ public class JocksInstance extends JocksValue {
         _properties.put(identifier, value);
     }
 
-    // TODO - Revisit this decision.
-    //        I'm not 100% sold on my choice here to use the tokens within this class.
-    //        Maybe it's better if the runtime representation of instances doesn't
-    //        contain details from scanning/parsing. It feels that some abstractions
-    //        may be leaking into one another.
-    //        On the other hand, however, propagating the tokens throughout the code
-    //        does make the localization of error messages better as they have the
-    //        file and line.
-    //        I'm hoping this isn't such an irreversible commitment, but I've
-    //        elected to go with it for now, hoping that the benefits outweigh
-    //        the costs, and that the fact that tokens are a pretty thin class
-    //        mitigates things somewhat.
-    private final Token _className;
+    public Optional<JocksValue> getMethod(String identifier) {
+        return _class.getMethodRecursive(identifier)
+                .map((method) -> new BoundMethod(this, method));
+    }
+
+    private final JocksClass _class;
     private final HashMap<String, JocksValue> _properties = new HashMap<>();
 }

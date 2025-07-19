@@ -1,0 +1,49 @@
+class Person {
+    fun __init__(self, first_name, last_name) {
+        self.first_name = first_name;
+        self.last_name  = last_name;
+    }
+    fun get_full_name(self) {
+        return self.first_name + " " + self.last_name;
+    }
+    fun get_details(self) {
+        return "Person: name = " + self.get_full_name() + ".";
+    }
+}
+class Teacher < Person {
+    fun __init__(self, first_name, last_name, grade) {
+        super.__init__(self, first_name, last_name);
+        self.grade = grade;
+    }
+    fun get_details(self) {
+        return "Teacher: name = " + self.get_full_name() + ", grade = " + to_string(self.grade) + ".";
+    }
+}
+class Student < Person {
+    fun __init__(self, first_name, last_name, grade) {
+        super.__init__(self, first_name, last_name);
+        self.grade = grade;
+    }
+    fun get_details(self) {
+        return "Student: name = " + self.get_full_name() + ", grade = " + to_string(self.grade) + ".";
+    }
+}
+# Create and print a Person
+{
+    var p = new Person("John", "Doe");
+    print p.get_details();
+}
+# Create and print a Teacher
+{
+    var p = new Teacher("John", "Doe", 12);
+    print p.get_details();
+}
+# Create and print a Student
+{
+    var p = new Student("John", "Doe", 12);
+    print p.get_details();
+}
+---* EXPECT *---
+Person: name = John Doe.
+Teacher: name = John Doe, grade = 12.0.
+Student: name = John Doe, grade = 12.0.

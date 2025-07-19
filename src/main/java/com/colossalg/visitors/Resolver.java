@@ -30,6 +30,9 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         declareAndDefine("floor");
         declareAndDefine("pow");
 
+        // Strings
+        declareAndDefine("to_string");
+
         // Global Object class which all other classes are descendants of.
         declareAndDefine("Object");
     }

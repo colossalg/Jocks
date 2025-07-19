@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public class JocksClass extends JocksValue {
 
-    public JocksClass(Token identifier, Token superClass, HashMap<String, JocksFunction> methods) {
+    public JocksClass(Token identifier, JocksClass superClass, HashMap<String, JocksFunction> methods) {
         _identifier = identifier;
         _superClass = superClass;
         _methods = methods;
@@ -20,21 +20,29 @@ public class JocksClass extends JocksValue {
         }
     }
 
+    @Override
+    public String str() {
+        return String.format("Class(%s)", _identifier.getText());
+    }
+
     public JocksInstance createInstance() {
-        return new JocksInstance(_identifier);
+        return new JocksInstance(this);
     }
 
     public Token getIdentifier() {
         return _identifier;
     }
 
-    public Token getSuperClass() {
-        return _superClass;
-    }
-
     public Optional<JocksFunction> getMethod(String identifier) {
         return Optional.ofNullable(
                 _methods.getOrDefault(identifier, null));
+    }
+
+    public Optional<JocksFunction> getMethodRecursive(String identifier) {
+        return getMethod(identifier)
+                .or(() -> _superClass == null
+                    ? Optional.empty()
+                    : _superClass.getMethodRecursive(identifier));
     }
 
     // TODO - Revisit this decision.
@@ -50,6 +58,6 @@ public class JocksClass extends JocksValue {
     //        the costs, and that the fact that tokens are a pretty thin class
     //        mitigates things somewhat.
     private final Token _identifier;
-    private final Token _superClass;
+    private final JocksClass _superClass;
     private final HashMap<String, JocksFunction> _methods;
 }
