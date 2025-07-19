@@ -12,7 +12,7 @@ public abstract class JocksValue {
     }
 
     public String str() {
-        return getClass().getSimpleName();
+        throw new UnsupportedOperationException("Str is not implemented by " + getClass().getName());
     }
 
     public JocksBool equal(JocksValue other) {

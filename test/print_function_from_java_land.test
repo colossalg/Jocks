@@ -1,0 +1,3 @@
+print isNil;
+---* EXPECT *---
+JocksJavaLandFunction

@@ -23,6 +23,11 @@ public class JocksUserLandFunction extends JocksFunction {
     }
 
     @Override
+    public String str() {
+        return "JocksUserLandFunction";
+    }
+
+    @Override
     public int getArity() {
         return _parameters.size();
     }

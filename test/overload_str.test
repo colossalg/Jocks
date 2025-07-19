@@ -1,0 +1,13 @@
+class Vector2D {
+    fun __init__(self, x, y) {
+        self.x = x;
+        self.y = y;
+    }
+    fun __str__(self) {
+        return "Vector2D(" + to_string(self.x) + "," + to_string(self.y) + ")";
+    }
+}
+var v = new Vector2D(1, 2);
+print v;
+---* EXPECT *---
+Vector2D(1.0,2.0)

@@ -3,4 +3,4 @@ class Dummy {
 }
 print Dummy;
 ---* EXPECT *---
-JocksClass(Dummy)
+Class(Dummy)

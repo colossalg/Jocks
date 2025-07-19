@@ -1,5 +1,9 @@
 package com.colossalg.dataTypes.functions;
 
 public abstract class JocksJavaLandFunction extends JocksFunction {
-    // Empty
+
+    @Override
+    public String str() {
+        return "JocksJavaLandFunction";
+    }
 }
