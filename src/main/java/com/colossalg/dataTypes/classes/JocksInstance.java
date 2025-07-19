@@ -16,8 +16,7 @@ public class JocksInstance extends JocksValue {
 
     @Override
     public String str() {
-        final var strMethod = getMethod("__str__")
-                .map((method) -> JocksValue.cast(method, JocksFunction.class));
+        final var strMethod = getMethod("__str__");
         if (strMethod.isPresent()) {
             return strMethod.get().call(new ArrayList<>()).str();
         } else {
@@ -34,7 +33,7 @@ public class JocksInstance extends JocksValue {
         _properties.put(identifier, value);
     }
 
-    public Optional<JocksValue> getMethod(String identifier) {
+    public Optional<JocksFunction> getMethod(String identifier) {
         return _class.getMethodRecursive(identifier)
                 .map((method) -> new BoundMethod(this, method));
     }
