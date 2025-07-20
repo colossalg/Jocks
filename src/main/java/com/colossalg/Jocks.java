@@ -8,11 +8,12 @@ import java.io.*;
 public class Jocks {
 
     public static void main(String[] args) {
+        final var file = args[0];
         final var errorReporter = new ErrorReporter();
 
         final var stringBuilder = new StringBuilder();
         try {
-            final var reader = new BufferedReader(new FileReader(args[0]));
+            final var reader = new BufferedReader(new FileReader(file));
             String line = reader.readLine();
             while (line != null) {
                 stringBuilder.append(line);
@@ -24,7 +25,7 @@ public class Jocks {
             return;
         }
 
-        final var scanner = new Scanner(errorReporter, stringBuilder.toString());
+        final var scanner = new Scanner(errorReporter, stringBuilder.toString(), file);
         final var tokens  = scanner.scanTokens();
         if (!errorReporter.getErrors().isEmpty()) {
             for (final var error : errorReporter.getErrors()) {

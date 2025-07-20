@@ -1,0 +1,7 @@
+print "" == "";
+print "Hello" == "Hello";
+print "A" == "B";
+---* EXPECT *---
+true
+true
+false

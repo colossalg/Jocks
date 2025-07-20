@@ -2,4 +2,6 @@
     return;
 }
 ---* EXPECT *---
-[Resolver] - (:2) - Return statement must be within function scope
+An internal error was encountered in the 'Resolver'.
+Where - (D:\Jocks\test\return_from_outside_function_or_method.source:2)
+What  - Return statements are only allowed from within a function or method.

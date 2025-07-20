@@ -307,9 +307,7 @@ public class Parser {
         if (match(TokenType.EQUAL)) {
             consume(TokenType.EQUAL);
             if (!(result instanceof VarExpression) && !(result instanceof DotExpression)) {
-                throw panic(String.format(
-                        "Invalid attempt to assign to LHS token with type %s.",
-                        peek().getType().name()));
+                throw panic("Left sub expression of an assignment expression must be either an identifier or '.' expression.\n");
             }
             result = new VarAssignment(file, line, result, parseExpression());
         }
@@ -432,7 +430,7 @@ public class Parser {
         }
 
         throw panic(String.format(
-                "Token type %s is not a valid start for the production 'Atomic'.",
+                "Token type '%s' is not a valid start for the production 'Atomic'.",
                 peek().getType().name()));
     }
 
@@ -516,11 +514,13 @@ public class Parser {
         if (!match(tokenTypes)) {
             final var tokenTypesStringBuilder = new StringBuilder();
             for (final var tokenType : tokenTypes) {
+                tokenTypesStringBuilder.append("'");
                 tokenTypesStringBuilder.append(tokenType.name());
-                tokenTypesStringBuilder.append(", ");
+                tokenTypesStringBuilder.append("'");
+                tokenTypesStringBuilder.append(",");
             }
             throw panic(String.format(
-                    "Expected token type [%s], but found token type %s.",
+                    "Expected token types [%s], but found token type '%s'.",
                     tokenTypesStringBuilder,
                     peek().getType().name()));
         }

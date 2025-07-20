@@ -10,7 +10,14 @@ public class JocksError {
     }
 
     public String getMessage() {
-        return String.format("[%s] - (%s:%d) - %s", _module, _file, _line, _what);
+        return String.format(
+                "An internal error was encountered in the '%s'.\n" +
+                "Where - (%s:%d)\n" +
+                "What  - %s",
+                _module,
+                _file,
+                _line,
+                _what);
     }
 
     private final String _module;

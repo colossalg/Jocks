@@ -1,45 +1,44 @@
 package com.colossalg.dataTypes;
 
-import com.colossalg.dataTypes.primitives.JocksBool;
+import java.util.Optional;
 
 public abstract class JocksValue {
 
-    public static <T> T cast(JocksValue value, Class<T> type) {
-        if (!type.isAssignableFrom(value.getClass())) {
-            throw new IllegalStateException("Internal casting error - Value was expected to have type " + type.getTypeName() + ".");
-        }
-        return type.cast(value);
+    public static <T> Optional<T> cast(JocksValue value, Class<T> type) {
+        return type.isAssignableFrom(value.getClass())
+                ? Optional.of(type.cast(value))
+                : Optional.empty();
     }
 
     public String str() {
         throw new UnsupportedOperationException("Str is not implemented by " + getClass().getName());
     }
 
-    public JocksBool equal(JocksValue other) {
+    public JocksValue equal(JocksValue other) {
         throw new UnsupportedOperationException("Equal is not implemented by " + getClass().getName());
     }
 
-    public JocksBool notEqual(JocksValue other) {
+    public JocksValue notEqual(JocksValue other) {
         throw new UnsupportedOperationException("NotEqual is not implemented by " + getClass().getName());
     }
 
-    public JocksBool lessThan(JocksValue other) {
+    public JocksValue lessThan(JocksValue other) {
         throw new UnsupportedOperationException("LessThan is not implemented by " + getClass().getName());
     }
 
-    public JocksBool lessThanOrEqual(JocksValue other) {
+    public JocksValue lessThanOrEqual(JocksValue other) {
         throw new UnsupportedOperationException("LessThanOrEqual is not implemented by " + getClass().getName());
     }
 
-    public JocksBool moreThan(JocksValue other) {
+    public JocksValue moreThan(JocksValue other) {
         throw new UnsupportedOperationException("MoreThan is not implemented by " + getClass().getName());
     }
 
-    public JocksBool moreThanOrEqual(JocksValue other) {
+    public JocksValue moreThanOrEqual(JocksValue other) {
         throw new UnsupportedOperationException("MoreThanOrEqual is not implemented by " + getClass().getName());
     }
 
-    public JocksBool not() {
+    public JocksValue not() {
         throw new UnsupportedOperationException("Not is not implemented by " + getClass().getName());
     }
 

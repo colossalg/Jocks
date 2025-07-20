@@ -1,0 +1,24 @@
+class FuzzyNumber {
+    fun __init__(self, value, tolerance) {
+        self.value = value;
+        self.tolerance = tolerance;
+    }
+    fun __equal__(self, other) {
+        return abs(self.value - other.value) < (self.tolerance + other.tolerance);
+    }
+}
+# Test for true case
+{
+    var v1 = new FuzzyNumber(1.0, 0.1);
+    var v2 = new FuzzyNumber(1.1, 0.1);
+    print (v1 == v2);
+}
+# Test for false case
+{
+    var v1 = new FuzzyNumber(1.0, 0.1);
+    var v2 = new FuzzyNumber(1.3, 0.1);
+    print (v1 == v2);
+}
+---* EXPECT *---
+true
+false

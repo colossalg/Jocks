@@ -12,15 +12,13 @@ public class JocksNil extends JocksValue {
     }
 
     @Override
-    public JocksBool equal(JocksValue other) {
-        return other == Instance
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+    public JocksValue equal(JocksValue other) {
+        return JocksBool.fromBoolean(other == Instance);
     }
 
     @Override
     public JocksBool notEqual(JocksValue other) {
-        return equal(other).not();
+        return JocksBool.fromBoolean(other != Instance);
     }
 
     private JocksNil() {}

@@ -14,51 +14,43 @@ public class JocksNumber extends JocksValue {
     }
 
     @Override
-    public JocksBool equal(JocksValue other) {
+    public JocksValue equal(JocksValue other) {
         if (!(other instanceof JocksNumber)) {
             return JocksBool.Falsey;
         }
-
-        return _data == ((JocksNumber)other)._data
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+        return JocksBool.fromBoolean(_data == ((JocksNumber)other)._data);
     }
 
     @Override
     public JocksBool notEqual(JocksValue other) {
-        return equal(other).not();
+        if (!(other instanceof JocksNumber)) {
+            return JocksBool.Truthy;
+        }
+        return JocksBool.fromBoolean(_data != ((JocksNumber)other)._data);
     }
 
     @Override
     public JocksBool lessThan(JocksValue other) {
         assertOtherIsJocksNumber(other);
-        return _data < ((JocksNumber)other)._data
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+        return JocksBool.fromBoolean(_data < ((JocksNumber)other)._data);
     }
 
     @Override
-    public JocksBool lessThanOrEqual(JocksValue other) {
+    public JocksValue lessThanOrEqual(JocksValue other) {
         assertOtherIsJocksNumber(other);
-        return _data <= ((JocksNumber)other)._data
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+        return JocksBool.fromBoolean(_data <= ((JocksNumber)other)._data);
     }
 
     @Override
-    public JocksBool moreThan(JocksValue other) {
+    public JocksValue moreThan(JocksValue other) {
         assertOtherIsJocksNumber(other);
-        return _data > ((JocksNumber)other)._data
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+        return JocksBool.fromBoolean(_data > ((JocksNumber)other)._data);
     }
 
     @Override
-    public JocksBool moreThanOrEqual(JocksValue other) {
+    public JocksValue moreThanOrEqual(JocksValue other) {
         assertOtherIsJocksNumber(other);
-        return _data >= ((JocksNumber)other)._data
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+        return JocksBool.fromBoolean(_data >= ((JocksNumber)other)._data);
     }
 
     @Override

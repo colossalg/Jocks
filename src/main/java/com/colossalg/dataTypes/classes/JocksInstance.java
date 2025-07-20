@@ -24,6 +24,21 @@ public class JocksInstance extends JocksValue {
         }
     }
 
+    @Override
+    public JocksValue equal(JocksValue other) {
+        final var equalMethod = getMethod("__equal__");
+        if (equalMethod.isPresent()) {
+            final var args = new ArrayList<JocksValue>() {{ add(other); }};
+            return equalMethod.get().call(args);
+        } else {
+            throw new UnsupportedOperationException(
+                    String.format(
+                            "The '==' operator has not been overridden for the class '%s' or any of its super classes.\n" +
+                            "\tConsider implementing the '__equal__' method to fix this error.",
+                            _class.getIdentifier().getText()));
+        }
+    }
+
     public Optional<JocksValue> getProperty(String identifier) {
         return Optional.ofNullable(
                 _properties.getOrDefault(identifier, null));
