@@ -28,9 +28,10 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         //        methods where the error localization can be applied.
         return new IllegalStateException(
                 String.format(
-                        "An internal error was encountered at runtime.\n" +
-                        "Where - (%s:%d)\n" +
-                        "What  - %s",
+                        """
+                        An internal error was encountered at runtime.
+                        Where - (%s:%d)
+                        What  - %s""",
                         file,
                         line,
                         what));

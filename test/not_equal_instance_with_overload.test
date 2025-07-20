@@ -4,25 +4,25 @@ class Tuple3 {
         self.v2 = v2;
         self.v3 = v3;
     }
-    fun __equal__(self, other) {
+    fun __not_equal__(self, other) {
         return (
-            self.v1 == other.v1 and
-            self.v2 == other.v2 and
-            self.v3 == other.v3
+            self.v1 != other.v1 or
+            self.v2 != other.v2 or
+            self.v3 != other.v3
         );
     }
 }
 # Test for true case
 {
     var t1 = new Tuple3(1.0, "Hello", nil);
-    var t2 = new Tuple3(1.0, "Hello", nil);
-    print t1 == t2;
+    var t2 = new Tuple3(1.0, "Hello", false);
+    print t1 != t2;
 }
 # Test for false case
 {
     var t1 = new Tuple3(1.0, "Hello", nil);
-    var t2 = new Tuple3(1.0, "Hello", false);
-    print t1 == t2;
+    var t2 = new Tuple3(1.0, "Hello", nil);
+    print t1 != t2;
 }
 ---* EXPECT *---
 true

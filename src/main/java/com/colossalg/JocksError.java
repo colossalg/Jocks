@@ -11,9 +11,10 @@ public class JocksError {
 
     public String getMessage() {
         return String.format(
-                "An internal error was encountered in the '%s'.\n" +
-                "Where - (%s:%d)\n" +
-                "What  - %s",
+                """
+                An internal error was encountered in the '%s'.
+                Where - (%s:%d)
+                What  - %s""",
                 _module,
                 _file,
                 _line,
