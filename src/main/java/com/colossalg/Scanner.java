@@ -5,9 +5,10 @@ import java.util.List;
 
 public class Scanner {
 
-    public Scanner(ErrorReporter errorReporter, String source) {
+    public Scanner(ErrorReporter errorReporter, String source, String file) {
         _errorReporter = errorReporter;
         _source = source;
+        _file = file;
     }
 
     public List<Token> scanTokens() {
@@ -171,6 +172,6 @@ public class Scanner {
     private final List<Token> _tokens = new ArrayList<>();
     private int _begLexemeIndex = 0;
     private int _curLexemeIndex = 0;
-    private final String _file = ""; // TODO - When supporting multiple files.
+    private final String _file;
     private int _line = 1;
 }

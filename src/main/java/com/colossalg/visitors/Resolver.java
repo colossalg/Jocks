@@ -27,6 +27,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         declareAndDefine("isClass");
 
         // Maths
+        declareAndDefine("abs");
         declareAndDefine("floor");
         declareAndDefine("pow");
 
@@ -54,7 +55,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
                         "Resolver",
                         statement.getFile(),
                         statement.getLine(),
-                        "Class declaration must be at the global scope"));
+                        "Class declarations are only allowed at the global scope."));
         }
 
         declareAndDefine(statement.getIdentifier());
@@ -136,7 +137,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
                             "Resolver",
                             statement.getFile(),
                             statement.getLine(),
-                            "Return statement must be within function scope"));
+                            "Return statements are only allowed from within a function or method."));
         }
         visitIfNotNull(statement.getSubExpression().orElse(null));
 
@@ -302,7 +303,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
                                     "Resolver",
                                     token.getFile(),
                                     token.getLine(),
-                                    "Attempting to reference undefined variable"));
+                                    "Attempting to reference undefined variable + '" + token.getText() + "'."));
                 }
                 return i;
             }
@@ -313,7 +314,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
                         "Resolver",
                         token.getFile(),
                         token.getLine(),
-                        "Attempting to reference undeclared variable"));
+                        "Attempting to reference undeclared variable + '" + token.getText() + "'."));
         return -1;
     }
 

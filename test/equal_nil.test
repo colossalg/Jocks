@@ -1,0 +1,5 @@
+print nil == nil;
+print nil == 0;
+---* EXPECT *---
+true
+false

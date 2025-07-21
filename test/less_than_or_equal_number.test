@@ -1,0 +1,13 @@
+# Test some true cases.
+{
+    print 1.0 <= 2.0;
+    print 1.0 <= 1.0;
+}
+# Test some false cases.
+{
+    print 2.0 <= 1.0;
+}
+---* EXPECT *---
+true
+true
+false

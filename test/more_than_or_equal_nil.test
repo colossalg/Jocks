@@ -1,0 +1,5 @@
+print nil >= nil;
+---* EXPECT *---
+An internal error was encountered at runtime.
+Where - (D:\Jocks\test\more_than_or_equal_nil.source:1)
+What  - MoreThanOrEqual is not implemented by com.colossalg.dataTypes.primitives.JocksNil

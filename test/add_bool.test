@@ -1,0 +1,5 @@
+print true + false;
+---* EXPECT *---
+An internal error was encountered at runtime.
+Where - (D:\Jocks\test\add_bool.source:1)
+What  - Add (binary) is not implemented by com.colossalg.dataTypes.primitives.JocksBool

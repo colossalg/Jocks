@@ -14,19 +14,19 @@ public class JocksString extends JocksValue {
     }
 
     @Override
-    public JocksBool equal(JocksValue other) {
+    public JocksValue equal(JocksValue other) {
         if (!(other instanceof JocksString)) {
             return JocksBool.Falsey;
         }
-
-        return _data.equals(((JocksString)other)._data)
-                ? JocksBool.Truthy
-                : JocksBool.Falsey;
+        return JocksBool.fromBoolean(_data.equals(((JocksString)other)._data));
     }
 
     @Override
     public JocksBool notEqual(JocksValue other) {
-        return equal(other).not();
+        if (!(other instanceof JocksString)) {
+            return JocksBool.Truthy;
+        }
+        return JocksBool.fromBoolean(!_data.equals(((JocksString)other)._data));
     }
 
     @Override

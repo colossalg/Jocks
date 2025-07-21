@@ -10,30 +10,34 @@ public class JocksBool extends JocksValue {
     @SuppressWarnings("SpellCheckingInspection")
     public static final JocksBool Falsey = new JocksBool(false);
 
+    public static JocksBool fromBoolean(boolean val) {
+        return val ? Truthy : Falsey;
+    }
+
     @Override
     public String str() {
         return _data ? "true" : "false";
     }
 
     @Override
-    public JocksBool equal(JocksValue other) {
+    public JocksValue equal(JocksValue other) {
         if (!(other instanceof JocksBool)) {
             return Falsey;
         }
-
-        return _data == ((JocksBool)other)._data
-                ? Truthy
-                : Falsey;
+        return fromBoolean(_data == ((JocksBool)other)._data);
     }
 
     @Override
-    public JocksBool notEqual(JocksValue other) {
-        return equal(other).not();
+    public JocksValue notEqual(JocksValue other) {
+        if (!(other instanceof JocksBool)) {
+            return Truthy;
+        }
+        return fromBoolean(_data != ((JocksBool)other)._data);
     }
 
     @Override
-    public JocksBool not() {
-        return _data ? Falsey : Truthy;
+    public JocksValue not() {
+        return fromBoolean(!_data);
     }
 
     private JocksBool(boolean data) {
