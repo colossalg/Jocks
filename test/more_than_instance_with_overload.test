@@ -1,0 +1,36 @@
+class VersionNumber {
+    fun __init__(self, major, minor, build) {
+        self.major = major;
+        self.minor = minor;
+        self.build = build;
+    }
+    fun __more_than__(self, other) {
+        return (
+            self.major > other.major or
+            self.minor > other.minor or
+            self.build > other.build
+        );
+    }
+}
+# Test for false case
+{
+    var t1 = new VersionNumber(1, 2, 3);
+    var t2 = new VersionNumber(1, 2, 4);
+    print t1 > t2;
+}
+# Test for false case
+{
+    var t1 = new VersionNumber(1, 2, 3);
+    var t2 = new VersionNumber(1, 2, 3);
+    print t1 > t2;
+}
+# Test for true case
+{
+    var t1 = new VersionNumber(1, 2, 4);
+    var t2 = new VersionNumber(1, 2, 3);
+    print t1 > t2;
+}
+---* EXPECT *---
+false
+false
+true

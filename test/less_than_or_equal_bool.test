@@ -1,0 +1,5 @@
+print true <= false;
+---* EXPECT *---
+An internal error was encountered at runtime.
+Where - (D:\Jocks\test\less_than_or_equal_bool.source:1)
+What  - LessThanOrEqual is not implemented by com.colossalg.dataTypes.primitives.JocksBool

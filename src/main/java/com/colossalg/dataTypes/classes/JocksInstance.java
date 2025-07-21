@@ -35,6 +35,26 @@ public class JocksInstance extends JocksValue {
     }
 
     @Override
+    public JocksValue lessThan(JocksValue other) {
+        return executeOverloadedBinaryOperator("<", "__less_than__", other);
+    }
+
+    @Override
+    public JocksValue lessThanOrEqual(JocksValue other) {
+        return executeOverloadedBinaryOperator("<=", "__less_than_or_equal__", other);
+    }
+
+    @Override
+    public JocksValue moreThan(JocksValue other) {
+        return executeOverloadedBinaryOperator(">", "__more_than__", other);
+    }
+
+    @Override
+    public JocksValue moreThanOrEqual(JocksValue other) {
+        return executeOverloadedBinaryOperator(">=", "__more_than_or_equal__", other);
+    }
+
+    @Override
     public JocksValue add() {
         return executeOverloadedUnaryOperator("+", "__unary_add__");
     }
