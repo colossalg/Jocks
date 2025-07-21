@@ -34,6 +34,26 @@ public class JocksInstance extends JocksValue {
         return executeOverloadedBinaryOperator("!=", "__not_equal__", other);
     }
 
+    @Override
+    public JocksValue add() {
+        return executeOverloadedUnaryOperator("+", "__unary_add__");
+    }
+
+    @Override
+    public JocksValue add(JocksValue other) {
+        return executeOverloadedBinaryOperator("+", "__add__", other);
+    }
+
+    @Override
+    public JocksValue sub() {
+        return executeOverloadedUnaryOperator("-", "__unary_sub__");
+    }
+
+    @Override
+    public JocksValue sub(JocksValue other) {
+        return executeOverloadedBinaryOperator("-", "__sub__", other);
+    }
+
     public Optional<JocksValue> getProperty(String identifier) {
         return Optional.ofNullable(
                 _properties.getOrDefault(identifier, null));
@@ -53,6 +73,21 @@ public class JocksInstance extends JocksValue {
         if (method.isPresent()) {
             final var args = new ArrayList<JocksValue>() {{ add(other); }};
             return method.get().call(args);
+        } else {
+            throw new UnsupportedOperationException(
+                    String.format(
+                            "The '%s' operator has not been overridden for the class '%s' or any of its super classes.\n" +
+                                    "\tConsider implementing the '%s' method to fix this error.",
+                            operator,
+                            _class.getIdentifier().getText(),
+                            methodName));
+        }
+    }
+
+    private JocksValue executeOverloadedUnaryOperator(String operator, String methodName) {
+        final var method = getMethod(methodName);
+        if (method.isPresent()) {
+            return method.get().call(new ArrayList<>());
         } else {
             throw new UnsupportedOperationException(
                     String.format(

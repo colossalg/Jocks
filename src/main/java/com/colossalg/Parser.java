@@ -58,24 +58,26 @@ public class Parser {
     }
 
     private void synchronize() {
-        _index++;
-        while (isNotAtEnd()) {
-            if (match(TokenType.SEMICOLON)) {
-                _index++;
-                break;
-            } else if (match(
-                    TokenType.CLASS,
-                    TokenType.FUN,
-                    TokenType.VAR,
-                    TokenType.IF,
-                    TokenType.WHILE,
-                    TokenType.FOR,
-                    TokenType.PRINT,
-                    TokenType.RETURN
-            )) {
-                break;
-            } else {
-                _index++;
+        if (isNotAtEnd()) {
+            _index++;
+            while (isNotAtEnd()) {
+                if (match(TokenType.SEMICOLON)) {
+                    _index++;
+                    break;
+                } else if (match(
+                        TokenType.CLASS,
+                        TokenType.FUN,
+                        TokenType.VAR,
+                        TokenType.IF,
+                        TokenType.WHILE,
+                        TokenType.FOR,
+                        TokenType.PRINT,
+                        TokenType.RETURN
+                )) {
+                    break;
+                } else {
+                    _index++;
+                }
             }
         }
     }
@@ -388,7 +390,7 @@ public class Parser {
     }
 
     private Expression parseUnaryOpChain() throws ParserException {
-        final var unaryOpTokenTypes = new TokenType[] { TokenType.BANGS, TokenType.SUB };
+        final var unaryOpTokenTypes = new TokenType[] { TokenType.BANGS, TokenType.ADD, TokenType.SUB };
 
         final var precedingOps = new Stack<Token>();
         while (match(unaryOpTokenTypes)) {
