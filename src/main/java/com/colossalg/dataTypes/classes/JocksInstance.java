@@ -54,6 +54,16 @@ public class JocksInstance extends JocksValue {
         return executeOverloadedBinaryOperator("-", "__sub__", other);
     }
 
+    @Override
+    public JocksValue mul(JocksValue other) {
+        return executeOverloadedBinaryOperator("*", "__mul__", other);
+    }
+
+    @Override
+    public JocksValue div(JocksValue other) {
+        return executeOverloadedBinaryOperator("/", "__div__", other);
+    }
+
     public Optional<JocksValue> getProperty(String identifier) {
         return Optional.ofNullable(
                 _properties.getOrDefault(identifier, null));

@@ -1,3 +1,5 @@
-print "Hello" + ", " + "World!";
+print "Hello" - "World";
 ---* EXPECT *---
-Hello, World!
+An internal error was encountered at runtime.
+Where - (D:\Jocks\test\sub_string.source:1)
+What  - Sub (binary) is not implemented by com.colossalg.dataTypes.primitives.JocksString
