@@ -1,0 +1,6 @@
+print "\n  - Line 1\n  - Line 2\n";
+---* EXPECT *---
+
+  - Line 1
+  - Line 2
+

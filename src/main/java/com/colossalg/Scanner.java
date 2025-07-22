@@ -80,6 +80,11 @@ public class Scanner {
         while (!isAtEnd() && !matches('"')) {
             if (matches('\n')) {
                 _line++;
+            } else if (matches('\\')) {
+                advance();
+                if (!matches('n') && !matches('t') && !matches('"') && !matches('\\')) {
+                    reportError(String.format("Unknown escaped char '\\%s'.", peekCur()));
+                }
             }
             advance();
         }
@@ -87,7 +92,11 @@ public class Scanner {
             reportError("String literal not terminated before EOF.");
         } else {
             advance(); // Consume ending '"'
-            final var literal = _source.substring(_begLexemeIndex + 1, _curLexemeIndex - 1);
+            final var literal = _source.substring(_begLexemeIndex + 1, _curLexemeIndex - 1)
+                    .replace("\\n", "\n")
+                    .replace("\\t", "\t")
+                    .replace("\\\"", "\"")
+                    .replace("\\\\", "\\");
             addToken(TokenType.STRING, literal);
         }
     }
