@@ -19,13 +19,16 @@ import java.util.function.Supplier;
 public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<JocksValue> {
 
     public static IllegalStateException createException(String file, int line, String what) {
-        // TODO - I think I should remove this from at leas the public interface of the class.
-        //        Everything outside of the interpreter (symbol table, etc.) should throw an
-        //        exception as normal which should be caught within the interpreter and
-        //        dealt with or propagated respectively.
-        //        Then we probably only need strings rather than tokens in all the runtime
-        //        representation as the exceptions will be caught within the below visitor
-        //        methods where the error localization can be applied.
+        // I don't really like this mechanism, but I think it's a necessary evil (for now at least).
+        // Being able to throw from within the SymbolTable without having to catch it to apply the
+        // localization from within this class makes the visitor methods below much terser.
+        // The unfortunate side effect of this is that the SymbolTable's interface relies on Tokens
+        // rather than Strings for identifiers. This then propagates to JocksClass and
+        // JocksUserLandFunction who have to store their identifier and parameters
+        // respectively as Tokens.
+        // That feels a bit like an abstraction leaking, as Tokens should probably be present during
+        // the static components of the interpreter (scanning, parsing, resolving), but not so much
+        // during runtime.
         return new IllegalStateException(
                 String.format(
                         """
