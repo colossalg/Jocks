@@ -3,16 +3,21 @@ package com.colossalg.builtin.functions;
 import com.colossalg.dataTypes.JocksValue;
 import com.colossalg.dataTypes.classes.JocksInstance;
 import com.colossalg.dataTypes.functions.JocksFunction;
-import com.colossalg.dataTypes.functions.JocksJavaLandFunction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoundMethod extends JocksJavaLandFunction {
+public class BoundMethod extends JocksFunction {
 
     public BoundMethod(JocksInstance instance, JocksFunction function) {
+        super(function.getName());
         _instance = instance;
         _function = function;
+    }
+
+    @Override
+    public String str() {
+        return String.format("BoundMethod(%s)", _function.str());
     }
 
     @Override

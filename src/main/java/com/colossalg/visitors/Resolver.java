@@ -18,13 +18,13 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         begScope(); // Global scope
 
         // Type checking
-        declareAndDefine("isNil");
-        declareAndDefine("isBool");
-        declareAndDefine("isNumber");
-        declareAndDefine("isString");
-        declareAndDefine("isInstance");
-        declareAndDefine("isFunction");
-        declareAndDefine("isClass");
+        declareAndDefine("is_nil");
+        declareAndDefine("is_bool");
+        declareAndDefine("is_number");
+        declareAndDefine("is_string");
+        declareAndDefine("is_instance");
+        declareAndDefine("is_function");
+        declareAndDefine("is_class");
 
         // Maths
         declareAndDefine("abs");

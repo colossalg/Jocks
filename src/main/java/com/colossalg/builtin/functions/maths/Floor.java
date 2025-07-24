@@ -8,6 +8,10 @@ import java.util.List;
 
 public class Floor extends JocksJavaLandFunction {
 
+    public Floor() {
+        super("floor");
+    }
+
     @Override
     public int getArity() {
         return 1;
@@ -16,7 +20,7 @@ public class Floor extends JocksJavaLandFunction {
     @Override
     public JocksValue call(List<JocksValue> arguments) {
         if (!(arguments.getFirst() instanceof JocksNumber x)) {
-            throw new IllegalStateException("Floor expects arguments to be of type JocksNumber.");
+            throw new IllegalStateException("floor() expects arguments to be of type JocksNumber.");
         }
 
         return new JocksNumber(Math.floor(x.getData()));

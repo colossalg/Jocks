@@ -1,0 +1,15 @@
+class Person {
+    fun __init__(self, first_name, last_name) {
+        self.first_name = first_name;
+        self.last_name = last_name;
+    }
+    fun get_full_name(self) {
+        return self.first_name + " " + self.last_name;
+    }
+}
+var p = new Person("John", "Doe");
+print Person.get_full_name;
+print p.get_full_name;
+---* EXPECT *---
+JocksUserLandFunction(Person.get_full_name)
+BoundMethod(JocksUserLandFunction(Person.get_full_name))

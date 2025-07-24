@@ -55,7 +55,7 @@ public class Jocks {
         try {
             final var interpreter = new Interpreter();
             interpreter.visitAll(statements);
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
         }
     }

@@ -42,13 +42,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     public Interpreter() {
         // Type checking
-        registerInternalVariable("isNil", new IsType<>(JocksNil.class));
-        registerInternalVariable("isBool", new IsType<>(JocksBool.class));
-        registerInternalVariable("isNumber", new IsType<>(JocksNumber.class));
-        registerInternalVariable("isString", new IsType<>(JocksString.class));
-        registerInternalVariable("isInstance", new IsType<>(JocksInstance.class));
-        registerInternalVariable("isFunction", new IsType<>(JocksFunction.class));
-        registerInternalVariable("isClass", new IsType<>(JocksClass.class));
+        registerInternalVariable("is_nil", new IsType<>("is_nil", JocksNil.class));
+        registerInternalVariable("is_bool", new IsType<>("is_bool", JocksBool.class));
+        registerInternalVariable("is_number", new IsType<>("is_number", JocksNumber.class));
+        registerInternalVariable("is_string", new IsType<>("is_string", JocksString.class));
+        registerInternalVariable("is_instance", new IsType<>("is_instance", JocksInstance.class));
+        registerInternalVariable("is_function", new IsType<>("is_function", JocksFunction.class));
+        registerInternalVariable("is_class", new IsType<>("is_class", JocksClass.class));
 
         // Maths
         registerInternalVariable("abs", new Abs());
@@ -96,9 +96,12 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
         final var methods = new HashMap<String, JocksFunction>();
         for (final var methodDeclaration : statement.getMethods()) {
+            final var methodName = methodDeclaration.getIdentifier().getText();
             methods.put(
-                    methodDeclaration.getIdentifier().getText(),
-                    funDeclarationToJocksFunction(methodDeclaration));
+                    methodName,
+                    funDeclarationToJocksFunction(
+                            statement.getIdentifier().getText() + "." + methodName,
+                            methodDeclaration));
         }
 
         popSymbolTable();
@@ -115,7 +118,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public Void visitFunDeclaration(FunDeclaration statement) {
         _symbolTable.createVariable(
                 statement.getIdentifier(),
-                funDeclarationToJocksFunction(statement));
+                funDeclarationToJocksFunction(
+                        statement.getIdentifier().getText(),
+                        statement));
 
         return null;
     }
@@ -494,8 +499,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         _symbolTable.createVariable(createInternalIdentifier(identifier), value);
     }
 
-    private JocksFunction funDeclarationToJocksFunction(FunDeclaration statement) {
+    private JocksFunction funDeclarationToJocksFunction(String functionName, FunDeclaration statement) {
         return new JocksUserLandFunction(
+                functionName,
                 statement.getParameters(),
                 statement.getStatements(),
                 _symbolTable,

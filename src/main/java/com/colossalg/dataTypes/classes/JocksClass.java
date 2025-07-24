@@ -16,7 +16,7 @@ public class JocksClass extends JocksValue {
         _methods = methods;
 
         if (getMethod("__init__").isEmpty()) {
-            _methods.put("__init__", new NoopConstructor());
+            _methods.put("__init__", new NoopConstructor(identifier.getText()));
         }
     }
 

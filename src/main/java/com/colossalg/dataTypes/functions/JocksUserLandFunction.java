@@ -11,11 +11,13 @@ import java.util.List;
 public class JocksUserLandFunction extends JocksFunction {
 
     public JocksUserLandFunction(
+            String name,
             List<Token> parameters,
             List<Statement> statements,
             SymbolTable symbolTable,
             Interpreter interpreter
     ) {
+        super(name);
         _parameters = parameters;
         _statements = statements;
         _symbolTable = symbolTable;
@@ -24,7 +26,7 @@ public class JocksUserLandFunction extends JocksFunction {
 
     @Override
     public String str() {
-        return "JocksUserLandFunction";
+        return String.format("JocksUserLandFunction(%s)", getName());
     }
 
     @Override

@@ -8,6 +8,10 @@ import java.util.List;
 
 public class ToString extends JocksJavaLandFunction {
 
+    public ToString() {
+        super("to_string");
+    }
+
     @Override
     public int getArity() {
         return 1;
