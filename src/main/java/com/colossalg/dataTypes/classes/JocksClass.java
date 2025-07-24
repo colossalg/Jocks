@@ -45,18 +45,6 @@ public class JocksClass extends JocksValue {
                     : _superClass.getMethodRecursive(identifier));
     }
 
-    // TODO - Revisit this decision.
-    //        I'm not 100% sold on my choice here to use the tokens within this class.
-    //        Maybe it's better if the runtime representation of classes doesn't
-    //        contain details from scanning/parsing. It feels that some abstractions
-    //        may be leaking into one another.
-    //        On the other hand, however, propagating the tokens throughout the code
-    //        does make the localization of error messages better as they have the
-    //        file and line.
-    //        I'm hoping this isn't such an irreversible commitment, but I've
-    //        elected to go with it for now, hoping that the benefits outweigh
-    //        the costs, and that the fact that tokens are a pretty thin class
-    //        mitigates things somewhat.
     private final Token _identifier;
     private final JocksClass _superClass;
     private final HashMap<String, JocksFunction> _methods;
