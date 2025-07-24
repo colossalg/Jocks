@@ -23,7 +23,7 @@ public class SymbolTable {
 
     public void createVariable(Token identifier, JocksValue value) {
         if (_variables.containsKey(identifier.getText())) {
-            throw Interpreter.createException(
+            throw ExceptionFactory.createException(
                     identifier.getFile(),
                     identifier.getLine(),
                     "Attempting to create variable '" + identifier.getText() + "' which already exists in scope");
@@ -34,7 +34,7 @@ public class SymbolTable {
     public JocksValue getVariable(Token identifier) {
         if (!_variables.containsKey(identifier.getText())) {
             if (_parent == null) {
-                throw Interpreter.createException(
+                throw ExceptionFactory.createException(
                         identifier.getFile(),
                         identifier.getLine(),
                         "Attempting to get variable '" + identifier.getText() + "' which doesn't exist");
@@ -48,7 +48,7 @@ public class SymbolTable {
     public void setVariable(Token identifier, JocksValue value) {
         if (!_variables.containsKey(identifier.getText())) {
             if (_parent == null) {
-                throw Interpreter.createException(
+                throw ExceptionFactory.createException(
                         identifier.getFile(),
                         identifier.getLine(),
                         "Attempting to set variable '" + identifier.getText() + "' which doesn't exist");

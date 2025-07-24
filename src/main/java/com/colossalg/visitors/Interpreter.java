@@ -18,28 +18,6 @@ import java.util.function.Supplier;
 
 public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<JocksValue> {
 
-    public static IllegalStateException createException(String file, int line, String what) {
-        // I don't really like this mechanism, but I think it's a necessary evil (for now at least).
-        // Being able to throw from within the SymbolTable without having to catch it to apply the
-        // localization from within this class makes the visitor methods below much terser.
-        // The unfortunate side effect of this is that the SymbolTable's interface relies on Tokens
-        // rather than Strings for identifiers. This then propagates to JocksClass and
-        // JocksUserLandFunction who have to store their identifier and parameters
-        // respectively as Tokens.
-        // That feels a bit like an abstraction leaking, as Tokens should probably be present during
-        // the static components of the interpreter (scanning, parsing, resolving), but not so much
-        // during runtime.
-        return new IllegalStateException(
-                String.format(
-                        """
-                        An internal error was encountered at runtime.
-                        Where - (%s:%d)
-                        What  - %s""",
-                        file,
-                        line,
-                        what));
-    }
-
     public Interpreter() {
         // Type checking
         registerInternalVariable("is_nil", new IsType<>("is_nil", JocksNil.class));
@@ -82,12 +60,11 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public Void visitClassDeclaration(ClassDeclaration statement) {
         final var superClassIdentifier = statement.getSuperClass().orElse(createInternalIdentifier("Object"));
         final var superClass = JocksValue.cast(_symbolTable.getVariable(superClassIdentifier), JocksClass.class)
-                .orElseThrow(() -> createException(
+                .orElseThrow(() -> ExceptionFactory.createException(
                         statement.getFile(),
                         statement.getLine(),
-                        String.format(
-                                "The identifier '%s' is not a class and can not be derived from.",
-                                superClassIdentifier.getText())));
+                        "The identifier '%s' is not a class and can not be derived from.",
+                        superClassIdentifier.getText()));
 
         pushSymbolTable();
         _symbolTable.createVariable(
@@ -137,7 +114,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitIfElseStatement(IfElseStatement statement) {
         final var conditionResult = JocksValue.cast(visit(statement.getCondition()), JocksBool.class)
-                .orElseThrow(() -> createException(
+                .orElseThrow(() -> ExceptionFactory.createException(
                         statement.getFile(),
                         statement.getLine(),
                         "If/else statement condition did not evaluate to type 'bool'."));
@@ -155,7 +132,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         // Helper lambda to evaluate condition, checking that type is JocksBool, etc.
         final Supplier<JocksBool> evaluateCondition = () ->
                 JocksValue.cast(visit(statement.getCondition()), JocksBool.class)
-                        .orElseThrow(() -> createException(
+                        .orElseThrow(() -> ExceptionFactory.createException(
                                 statement.getFile(),
                                 statement.getLine(),
                                 "While statement condition did not evaluate to type 'bool'."));
@@ -179,7 +156,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                 return JocksBool.Truthy;
             }
             return JocksValue.cast(visit(condition.get()), JocksBool.class)
-                    .orElseThrow(() -> createException(
+                    .orElseThrow(() -> ExceptionFactory.createException(
                             statement.getFile(),
                             statement.getLine(),
                             "For statement condition did not evaluate to type 'bool'."));
@@ -245,31 +222,29 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var shortCircuitValue = switch (operator.getType()) {
             case TokenType.AND -> JocksBool.Falsey;
             case TokenType.OR  -> JocksBool.Truthy;
-            default -> throw createException(
+            default -> throw ExceptionFactory.createException(
                     expression.getFile(),
                     expression.getLine(),
                     "Invalid logical operator type '" + operator.getType().name() + "'.");
         };
 
         final var lftSubExpressionResult = JocksValue.cast(visit(expression.getLftSubExpression()), JocksBool.class)
-                .orElseThrow(() -> createException(
+                .orElseThrow(() -> ExceptionFactory.createException(
                         expression.getFile(),
                         expression.getLine(),
-                        String.format(
-                                "Left sub expression of '%s' expression did not evaluate to type 'bool.",
-                                expression.getOperator().getText())));
+                        "Left sub expression of '%s' expression did not evaluate to type 'bool.",
+                        expression.getOperator().getText()));
 
         if (lftSubExpressionResult == shortCircuitValue) {
             return lftSubExpressionResult;
         }
 
         return JocksValue.cast(visit(expression.getRgtSubExpression()), JocksBool.class)
-                .orElseThrow(() -> createException(
+                .orElseThrow(() -> ExceptionFactory.createException(
                         expression.getFile(),
                         expression.getLine(),
-                        String.format(
-                                "Right sub expression of '%s' expression did not evaluate to type 'bool.",
-                                expression.getOperator().getText())));
+                        "Right sub expression of '%s' expression did not evaluate to type 'bool.",
+                        expression.getOperator().getText()));
     }
 
     @Override
@@ -289,14 +264,14 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                 case TokenType.SUB -> lftSubExpressionResult.sub(rgtSubExpressionResult);
                 case TokenType.MUL -> lftSubExpressionResult.mul(rgtSubExpressionResult);
                 case TokenType.DIV -> lftSubExpressionResult.div(rgtSubExpressionResult);
-                default -> throw createException(
+                default -> throw ExceptionFactory.createException(
                         expression.getFile(),
                         expression.getLine(),
                         "Invalid binary operator type '" + operator.getType().name() + "'.");
             };
         } catch (UnsupportedOperationException ex) {
             // Add localization and re-throw.
-            throw createException(expression.getFile(), expression.getLine(), ex.getMessage());
+            throw ExceptionFactory.createException(expression.getFile(), expression.getLine(), ex.getMessage());
         }
     }
 
@@ -309,14 +284,14 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                 case TokenType.BANGS -> subExpressionResult.not();
                 case TokenType.ADD -> subExpressionResult.add();
                 case TokenType.SUB -> subExpressionResult.sub();
-                default -> throw createException(
+                default -> throw ExceptionFactory.createException(
                         expression.getFile(),
                         expression.getLine(),
                         "Invalid unary operator type '" + operator.getType().name() + "'.");
             };
         } catch (UnsupportedOperationException ex) {
             // Add localization and re-throw.
-            throw createException(expression.getFile(), expression.getLine(), ex.getMessage());
+            throw ExceptionFactory.createException(expression.getFile(), expression.getLine(), ex.getMessage());
         }
     }
 
@@ -335,7 +310,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             return instance
                     .getProperty(rhsIdentifier.getText())
                     .or(() -> instance.getMethod(rhsIdentifier.getText()))
-                    .orElseThrow(() -> createException(
+                    .orElseThrow(() -> ExceptionFactory.createException(
                             rhsIdentifier.getFile(),
                             rhsIdentifier.getLine(),
                             "Couldn't find property or method '" + rhsIdentifier.getText() + "' on instance."));
@@ -344,16 +319,15 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         if ((lhsExpressionResult instanceof JocksClass jClass)) {
             // Return the method if it exists.
             return jClass.getMethodRecursive(rhsIdentifier.getText())
-                    .orElseThrow(() -> createException(
+                    .orElseThrow(() -> ExceptionFactory.createException(
                             rhsIdentifier.getFile(),
                             rhsIdentifier.getLine(),
-                            String.format(
-                                    "Couldn't find method '%s' on class '%s'.",
-                                    rhsIdentifier.getText(),
-                                    jClass.getIdentifier().getText())));
+                            "Couldn't find method '%s' on class '%s'.",
+                            rhsIdentifier.getText(),
+                            jClass.getIdentifier().getText()));
         }
 
-        throw createException(
+        throw ExceptionFactory.createException(
                 rhsIdentifier.getFile(),
                 rhsIdentifier.getLine(),
                 "Left sub expression of '.' expression did not evaluate to an instance or class.");
@@ -362,7 +336,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public JocksValue visitFunInvocation(FunInvocation expression) {
         final var invoked = JocksValue.cast(visit(expression.getSubExpression()), JocksFunction.class)
-                .orElseThrow(() -> createException(
+                .orElseThrow(() -> ExceptionFactory.createException(
                         expression.getFile(),
                         expression.getLine(),
                         "Sub expression did not evaluate to a function which can be invoked."));
@@ -370,10 +344,12 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var funcArity = invoked.getArity();
         final var exprArity = expression.getArguments().size();
         if (funcArity != exprArity) {
-            throw createException(
+            throw ExceptionFactory.createException(
                     expression.getFile(),
                     expression.getLine(),
-                    String.format("Number of parameters (%d) did not match what was expected (%d).", funcArity, exprArity));
+                    "Number of parameters (%d) did not match what was expected (%d).",
+                    funcArity,
+                    exprArity);
         }
 
         final var argumentResults = new ArrayList<JocksValue>();
@@ -391,12 +367,11 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                         .getAncestor(expression.getSymbolTableDepth())
                         .getVariable(expression.getIdentifier()),
                 JocksClass.class)
-                .orElseThrow(() -> createException(
+                .orElseThrow(() -> ExceptionFactory.createException(
                         expression.getFile(),
                         expression.getLine(),
-                        String.format(
-                                "The identifier '%s' is not a class from which a new instance can be instantiated.",
-                                expression.getIdentifier().getText())));
+                        "The identifier '%s' is not a class from which a new instance can be instantiated.",
+                        expression.getIdentifier().getText()));
 
         final var instance = invoked.createInstance();
 
@@ -404,10 +379,12 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var initArity  = initMethod.getArity();
         final var exprArity  = expression.getArguments().size() + 1; // Leading instance parameter - implicitly passed.
         if (initArity != exprArity) {
-            throw createException(
+            throw ExceptionFactory.createException(
                     expression.getFile(),
                     expression.getLine(),
-                    String.format("Number of parameters (%d) did not match what was expected (%d).", initArity, exprArity));
+                    "Number of parameters (%d) did not match what was expected (%d).",
+                    initArity,
+                    exprArity);
         }
 
         final var argumentResults = new ArrayList<JocksValue>();
@@ -426,7 +403,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var rhsResult = visit(expression.getRhsExpression());
         if (expression.getLhsExpression() instanceof DotExpression lhsDotExpression) {
             final var instance = JocksValue.cast(visit(lhsDotExpression.getLhsExpression()), JocksInstance.class)
-                    .orElseThrow(() -> createException(
+                    .orElseThrow(() -> ExceptionFactory.createException(
                             expression.getFile(),
                             expression.getLine(),
                             "The left sub expression did not evaluate to an instance during '.' assignment expression."));
@@ -457,7 +434,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             case TokenType.TRUE  -> JocksBool.Truthy;
             case TokenType.FALSE -> JocksBool.Falsey;
             case TokenType.NIL -> JocksNil.Instance;
-            default -> throw createException(
+            default -> throw ExceptionFactory.createException(
                     literalToken.getFile(),
                     literalToken.getLine(),
                     "Invalid literal type '" + literalToken.getType().name() + "'.");
