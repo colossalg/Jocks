@@ -2,15 +2,9 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class UnaryExpression extends Expression {
+public class UnaryExpression implements Expression {
 
-    public UnaryExpression(
-            String file,
-            int line,
-            Token operator,
-            Expression subExpression
-    ) {
-        super(file, line);
+    public UnaryExpression(Token operator, Expression subExpression) {
         _operator = operator;
         _subExpression = subExpression;
     }

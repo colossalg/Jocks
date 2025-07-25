@@ -53,8 +53,8 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
             _errorReporter.report(
                     new JocksError(
                         "Resolver",
-                        statement.getFile(),
-                        statement.getLine(),
+                        statement.getIdentifier().getFile(),
+                        statement.getIdentifier().getLine(),
                         "Class declarations are only allowed at the global scope."));
         }
 

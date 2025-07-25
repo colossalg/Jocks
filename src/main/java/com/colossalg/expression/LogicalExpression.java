@@ -2,16 +2,13 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class LogicalExpression extends Expression {
+public class LogicalExpression implements Expression {
 
     public LogicalExpression(
-            String file,
-            int line,
             Token operator,
             Expression lftSubExpression,
             Expression rgtSubExpression
     ) {
-        super(file, line);
         _operator = operator;
         _lftSubExpression = lftSubExpression;
         _rgtSubExpression = rgtSubExpression;

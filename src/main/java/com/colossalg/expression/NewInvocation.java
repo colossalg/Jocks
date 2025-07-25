@@ -4,7 +4,7 @@ import com.colossalg.Token;
 
 import java.util.List;
 
-public class NewInvocation extends Expression {
+public class NewInvocation implements Expression {
 
     public NewInvocation(
             String file,
@@ -12,7 +12,8 @@ public class NewInvocation extends Expression {
             Token identifier,
             List<Expression> arguments
     ) {
-        super(file, line);
+        _file = file;
+        _line = line;
         _identifier = identifier;
         _arguments  = arguments;
     }
@@ -30,6 +31,14 @@ public class NewInvocation extends Expression {
         _symbolTableDepth = symbolTableDepth;
     }
 
+    public String getFile() {
+        return _file;
+    }
+
+    public int getLine() {
+        return _line;
+    }
+
     public Token getIdentifier() {
         return _identifier;
     }
@@ -39,6 +48,8 @@ public class NewInvocation extends Expression {
     }
 
     private int _symbolTableDepth = 0;
+    private final String _file;
+    private final int _line;
     private final Token _identifier;
     private final List<Expression> _arguments;
 }

@@ -2,14 +2,9 @@ package com.colossalg.statement;
 
 import java.util.List;
 
-public class BlockStatement extends Statement {
+public class BlockStatement implements Statement {
 
-    public BlockStatement(
-            String file,
-            int line,
-            List<Statement> subStatements
-    ) {
-        super(file, line);
+    public BlockStatement(List<Statement> subStatements) {
         _subStatements = subStatements;
     }
 

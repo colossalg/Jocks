@@ -5,16 +5,13 @@ import com.colossalg.Token;
 import java.util.List;
 import java.util.Optional;
 
-public class ClassDeclaration extends Statement {
+public class ClassDeclaration implements Statement {
 
     public ClassDeclaration(
-            String file,
-            int line,
             Token identifier,
             Token superClass,
             List<FunDeclaration> methods
     ) {
-        super(file, line);
         _identifier = identifier;
         _superClass = superClass;
         _methods = methods;

@@ -2,14 +2,9 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class VarExpression extends Expression {
+public class VarExpression implements Expression {
 
-    public VarExpression(
-            String file,
-            int line,
-            Token identifier
-    ) {
-        super(file, line);
+    public VarExpression(Token identifier) {
         _identifier = identifier;
     }
 

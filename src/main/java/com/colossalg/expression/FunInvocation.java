@@ -2,7 +2,7 @@ package com.colossalg.expression;
 
 import java.util.List;
 
-public class FunInvocation extends Expression {
+public class FunInvocation implements Expression {
 
     public FunInvocation(
             String file,
@@ -10,7 +10,8 @@ public class FunInvocation extends Expression {
             Expression subExpression,
             List<Expression> arguments
     ) {
-        super(file, line);
+        _file = file;
+        _line = line;
         _subExpression = subExpression;
         _arguments  = arguments;
     }
@@ -18,6 +19,14 @@ public class FunInvocation extends Expression {
     @Override
     public <T> T accept(ExpressionVisitor<T> visitor) {
         return visitor.visitFunInvocation(this);
+    }
+
+    public String getFile() {
+        return _file;
+    }
+
+    public int getLine() {
+        return _line;
     }
 
     public Expression getSubExpression() {
@@ -28,6 +37,8 @@ public class FunInvocation extends Expression {
         return _arguments;
     }
 
+    private final String _file;
+    private final int _line;
     private final Expression _subExpression;
     private final List<Expression> _arguments;
 }
