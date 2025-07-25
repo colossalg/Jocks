@@ -7,8 +7,9 @@ import java.util.HashMap;
 
 public class SymbolTable {
 
-    public SymbolTable(SymbolTable parent) {
+    public SymbolTable(SymbolTable parent, ExceptionFactory exceptionFactory) {
         _parent = parent;
+        _exceptionFactory = exceptionFactory;
     }
 
     public SymbolTable getParent() {
@@ -23,7 +24,7 @@ public class SymbolTable {
 
     public void createVariable(Token identifier, JocksValue value) {
         if (_variables.containsKey(identifier.getText())) {
-            throw ExceptionFactory.createException(
+            throw _exceptionFactory.createException(
                     identifier.getFile(),
                     identifier.getLine(),
                     "Attempting to create variable '" + identifier.getText() + "' which already exists in scope");
@@ -34,7 +35,7 @@ public class SymbolTable {
     public JocksValue getVariable(Token identifier) {
         if (!_variables.containsKey(identifier.getText())) {
             if (_parent == null) {
-                throw ExceptionFactory.createException(
+                throw _exceptionFactory.createException(
                         identifier.getFile(),
                         identifier.getLine(),
                         "Attempting to get variable '" + identifier.getText() + "' which doesn't exist");
@@ -48,7 +49,7 @@ public class SymbolTable {
     public void setVariable(Token identifier, JocksValue value) {
         if (!_variables.containsKey(identifier.getText())) {
             if (_parent == null) {
-                throw ExceptionFactory.createException(
+                throw _exceptionFactory.createException(
                         identifier.getFile(),
                         identifier.getLine(),
                         "Attempting to set variable '" + identifier.getText() + "' which doesn't exist");
@@ -60,5 +61,6 @@ public class SymbolTable {
     }
 
     private final SymbolTable _parent;
+    private final ExceptionFactory _exceptionFactory;
     private final HashMap<String, JocksValue> _variables = new HashMap<>();
 }
