@@ -1,7 +1,6 @@
 package com.colossalg.visitors;
 
 import com.colossalg.dataTypes.JocksValue;
-import com.colossalg.Token;
 
 import java.util.HashMap;
 
@@ -22,41 +21,35 @@ public class SymbolTable {
                 : this;
     }
 
-    public void createVariable(Token identifier, JocksValue value) {
-        if (_variables.containsKey(identifier.getText())) {
-            throw _exceptionFactory.createExceptionWithFileAndLine(
-                    identifier.getFile(),
-                    identifier.getLine(),
-                    "Attempting to create variable '" + identifier.getText() + "' which already exists in scope");
+    public void createVariable(String identifier, JocksValue value) {
+        if (_variables.containsKey(identifier)) {
+            throw _exceptionFactory.createExceptionWithoutFileOrLine(
+                    "Attempting to create variable '" + identifier + "' which already exists in scope");
         }
-        _variables.put(identifier.getText(), value);
+        _variables.put(identifier, value);
     }
 
-    public JocksValue getVariable(Token identifier) {
-        if (!_variables.containsKey(identifier.getText())) {
+    public JocksValue getVariable(String identifier) {
+        if (!_variables.containsKey(identifier)) {
             if (_parent == null) {
-                throw _exceptionFactory.createExceptionWithFileAndLine(
-                        identifier.getFile(),
-                        identifier.getLine(),
-                        "Attempting to get variable '" + identifier.getText() + "' which doesn't exist");
+                throw _exceptionFactory.createExceptionWithoutFileOrLine(
+                        "Attempting to get variable '" + identifier + "' which doesn't exist");
             }
             return _parent.getVariable(identifier);
         } else {
-            return _variables.get(identifier.getText());
+            return _variables.get(identifier);
         }
     }
 
-    public void setVariable(Token identifier, JocksValue value) {
-        if (!_variables.containsKey(identifier.getText())) {
+    public void setVariable(String identifier, JocksValue value) {
+        if (!_variables.containsKey(identifier)) {
             if (_parent == null) {
-                throw _exceptionFactory.createExceptionWithFileAndLine(
-                        identifier.getFile(),
-                        identifier.getLine(),
-                        "Attempting to set variable '" + identifier.getText() + "' which doesn't exist");
+                throw _exceptionFactory.createExceptionWithoutFileOrLine(
+                        "Attempting to set variable '" + identifier + "' which doesn't exist");
             }
             _parent.setVariable(identifier, value);
         } else {
-            _variables.put(identifier.getText(), value);
+            _variables.put(identifier, value);
         }
     }
 

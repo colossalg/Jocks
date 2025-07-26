@@ -4,16 +4,6 @@ import java.util.List;
 
 import java.util.function.Supplier;
 
-// I don't really like this mechanism, but I think it's a necessary evil (for now at least).
-// Being able to throw from within the SymbolTable without having to catch it to apply the
-// localization from within this class makes the visitor methods below much terser.
-// The unfortunate side effect of this is that the SymbolTable's interface relies on Tokens
-// rather than Strings for identifiers. This then propagates to JocksClass and
-// JocksUserLandFunction who have to store their identifier and parameters
-// respectively as Tokens.
-// That feels a bit like an abstraction leaking, as Tokens should probably be present during
-// the static components of the interpreter (scanning, parsing, resolving), but not so much
-// during runtime.
 public class ExceptionFactory {
 
     public ExceptionFactory(Supplier<List<String>> getCallStackEntryInfo) {

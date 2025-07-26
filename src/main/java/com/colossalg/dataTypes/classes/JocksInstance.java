@@ -69,7 +69,7 @@ public class JocksInstance extends JocksValue {
         if (strMethod.isPresent()) {
             return strMethod.get().call(new ArrayList<>()).str();
         } else {
-            return String.format("Instance(%s)", _class.getIdentifier().getText());
+            return String.format("Instance(%s)", _class.getIdentifier());
         }
     }
 
@@ -162,7 +162,7 @@ public class JocksInstance extends JocksValue {
                             "The '%s' operator has not been overridden for the class '%s' or any of its super classes.\n" +
                                     "\tConsider implementing the '%s' method to fix this error.",
                             binaryOperatorTypeToSourceString(operator),
-                            _class.getIdentifier().getText(),
+                            _class.getIdentifier(),
                             binaryOperatorTypeToMethodString(operator)));
         }
     }
@@ -177,7 +177,7 @@ public class JocksInstance extends JocksValue {
                             "The '%s' operator has not been overridden for the class '%s' or any of its super classes.\n" +
                                     "\tConsider implementing the '%s' method to fix this error.",
                             unaryOperatorTypeToSourceString(operator),
-                            _class.getIdentifier().getText(),
+                            _class.getIdentifier(),
                             unaryOperatorTypeToMethodString(operator)));
         }
     }
