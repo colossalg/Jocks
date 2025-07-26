@@ -8,6 +8,10 @@ import java.util.List;
 
 public class NoopConstructor extends JocksJavaLandFunction {
 
+    public NoopConstructor(String className) {
+        super(className + ".__init__");
+    }
+
     @Override
     public int getArity() {
         return 1;

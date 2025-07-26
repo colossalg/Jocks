@@ -8,6 +8,10 @@ import java.util.List;
 
 public class Pow extends JocksJavaLandFunction {
 
+    public Pow() {
+        super("pow");
+    }
+
     @Override
     public int getArity() {
         return 2;
@@ -16,7 +20,7 @@ public class Pow extends JocksJavaLandFunction {
     @Override
     public JocksValue call(List<JocksValue> arguments) {
         if (!(arguments.get(0) instanceof JocksNumber x) || !(arguments.get(1) instanceof JocksNumber y)) {
-            throw new IllegalStateException("Pow expects arguments to both be of type JocksNumber.");
+            throw new IllegalStateException("pow() expects arguments to both be of type JocksNumber.");
         }
 
         return new JocksNumber(Math.pow(x.getData(), y.getData()));

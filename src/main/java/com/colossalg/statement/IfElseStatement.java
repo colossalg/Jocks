@@ -4,16 +4,13 @@ import com.colossalg.expression.Expression;
 
 import java.util.Optional;
 
-public class IfElseStatement extends Statement {
+public class IfElseStatement implements Statement {
 
     public IfElseStatement(
-            String file,
-            int line,
             Expression condition,
             Statement thenSubStatement,
             Statement elseSubStatement
     ) {
-        super(file, line);
         _condition = condition;
         _thenSubStatement = thenSubStatement;
         _elseSubStatement = elseSubStatement;

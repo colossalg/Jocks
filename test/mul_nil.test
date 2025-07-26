@@ -1,5 +1,7 @@
 print nil * nil;
 ---* EXPECT *---
-An internal error was encountered at runtime.
-Where - (D:\Jocks\test\mul_nil.source:1)
-What  - Mul is not implemented by com.colossalg.dataTypes.primitives.JocksNil
+Mul is not implemented by com.colossalg.dataTypes.primitives.JocksNil
+
+	An internal runtime error was encountered (at line 1 of file 'D:\Jocks\test\mul_nil.source').
+	Call stack:
+

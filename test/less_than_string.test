@@ -1,5 +1,7 @@
 print "Hello" < "World";
 ---* EXPECT *---
-An internal error was encountered at runtime.
-Where - (D:\Jocks\test\less_than_string.source:1)
-What  - LessThan is not implemented by com.colossalg.dataTypes.primitives.JocksString
+LessThan is not implemented by com.colossalg.dataTypes.primitives.JocksString
+
+	An internal runtime error was encountered (at line 1 of file 'D:\Jocks\test\less_than_string.source').
+	Call stack:
+

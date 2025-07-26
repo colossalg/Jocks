@@ -3,15 +3,9 @@ package com.colossalg.statement;
 import com.colossalg.Token;
 import com.colossalg.expression.Expression;
 
-public class VarDeclaration extends Statement {
+public class VarDeclaration implements Statement {
 
-    public VarDeclaration(
-            String file,
-            int line,
-            Token identifier,
-            Expression expression
-    ) {
-        super(file, line);
+    public VarDeclaration(Token identifier, Expression expression) {
         _identifier = identifier;
         _expression = expression;
     }

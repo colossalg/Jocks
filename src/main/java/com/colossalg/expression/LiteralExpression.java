@@ -2,14 +2,9 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class LiteralExpression extends Expression {
+public class LiteralExpression implements Expression {
 
-    public LiteralExpression(
-            String file,
-            int line,
-            Token token
-    ) {
-        super(file, line);
+    public LiteralExpression(Token token) {
         _token = token;
     }
 

@@ -1,5 +1,7 @@
 print true < false;
 ---* EXPECT *---
-An internal error was encountered at runtime.
-Where - (D:\Jocks\test\less_than_bool.source:1)
-What  - LessThan is not implemented by com.colossalg.dataTypes.primitives.JocksBool
+LessThan is not implemented by com.colossalg.dataTypes.primitives.JocksBool
+
+	An internal runtime error was encountered (at line 1 of file 'D:\Jocks\test\less_than_bool.source').
+	Call stack:
+

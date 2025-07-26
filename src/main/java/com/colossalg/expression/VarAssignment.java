@@ -1,14 +1,8 @@
 package com.colossalg.expression;
 
-public class VarAssignment extends Expression {
+public class VarAssignment implements Expression {
 
-    public VarAssignment(
-            String file,
-            int line,
-            Expression lhsExpression,
-            Expression rhsExpression
-    ) {
-        super(file, line);
+    public VarAssignment(Expression lhsExpression, Expression rhsExpression) {
         _lhsExpression = lhsExpression;
         _rhsExpression = rhsExpression;
     }

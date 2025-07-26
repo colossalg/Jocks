@@ -8,6 +8,10 @@ import java.util.List;
 
 public class Abs extends JocksJavaLandFunction {
 
+    public Abs() {
+        super("abs");
+    }
+
     @Override
     public int getArity() {
         return 1;
@@ -16,7 +20,7 @@ public class Abs extends JocksJavaLandFunction {
     @Override
     public JocksValue call(List<JocksValue> arguments) {
         if (!(arguments.getFirst() instanceof JocksNumber x)) {
-            throw new IllegalStateException("Abs expects arguments to be of type JocksNumber.");
+            throw new IllegalStateException("abs() expects arguments to be of type JocksNumber.");
         }
 
         return new JocksNumber(Math.abs(x.getData()));

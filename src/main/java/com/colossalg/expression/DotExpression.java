@@ -2,15 +2,9 @@ package com.colossalg.expression;
 
 import com.colossalg.Token;
 
-public class DotExpression extends Expression {
+public class DotExpression implements Expression {
 
-    public DotExpression(
-            String file,
-            int line,
-            Expression lhsExpression,
-            Token rhsIdentifier
-    ) {
-        super(file, line);
+    public DotExpression(Expression lhsExpression, Token rhsIdentifier) {
         _lhsExpression = lhsExpression;
         _rhsIdentifier = rhsIdentifier;
     }

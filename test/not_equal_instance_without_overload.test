@@ -8,7 +8,10 @@ var p1 = new Point(1, 2);
 var p2 = new Point(1, 2);
 print p1 != p2;
 ---* EXPECT *---
-An internal error was encountered at runtime.
-Where - (D:\Jocks\test\not_equal_instance_without_overload.source:9)
-What  - The '!=' operator has not been overridden for the class 'Point' or any of its super classes.
-	Consider implementing the '__not_equal__' method to fix this error.
+The '!=' operator has not been overridden for the class 'Point' or any of its super classes.
+Consider implementing the '__not_equal__' method to fix this error.
+
+	An internal runtime error was encountered (at line 9 of file 'D:\Jocks\test\not_equal_instance_without_overload.source').
+	Call stack:
+		Point.__not_equal__ at D:\Jocks\test\not_equal_instance_without_overload.source:9
+

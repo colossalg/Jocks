@@ -1,0 +1,19 @@
+fun baz() {
+    print true + false; # This will cause an error.
+}
+fun bar() {
+    baz();
+}
+fun foo() {
+    bar();
+}
+foo();
+---* EXPECT *---
+Add (binary) is not implemented by com.colossalg.dataTypes.primitives.JocksBool
+
+	An internal runtime error was encountered (at line 2 of file 'D:\Jocks\test\call_stack_in_error.source').
+	Call stack:
+		foo at D:\Jocks\test\call_stack_in_error.source:10
+		bar at D:\Jocks\test\call_stack_in_error.source:8
+		baz at D:\Jocks\test\call_stack_in_error.source:5
+

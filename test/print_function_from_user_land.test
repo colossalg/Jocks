@@ -3,4 +3,4 @@ fun dummy() {
 }
 print dummy;
 ---* EXPECT *---
-JocksUserLandFunction
+JocksUserLandFunction(dummy)

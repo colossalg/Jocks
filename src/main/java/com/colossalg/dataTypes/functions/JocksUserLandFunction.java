@@ -1,6 +1,5 @@
 package com.colossalg.dataTypes.functions;
 
-import com.colossalg.Token;
 import com.colossalg.dataTypes.JocksValue;
 import com.colossalg.statement.Statement;
 import com.colossalg.visitors.Interpreter;
@@ -11,11 +10,13 @@ import java.util.List;
 public class JocksUserLandFunction extends JocksFunction {
 
     public JocksUserLandFunction(
-            List<Token> parameters,
+            String name,
+            List<String> parameters,
             List<Statement> statements,
             SymbolTable symbolTable,
             Interpreter interpreter
     ) {
+        super(name);
         _parameters = parameters;
         _statements = statements;
         _symbolTable = symbolTable;
@@ -24,7 +25,7 @@ public class JocksUserLandFunction extends JocksFunction {
 
     @Override
     public String str() {
-        return "JocksUserLandFunction";
+        return String.format("JocksUserLandFunction(%s)", getName());
     }
 
     @Override
@@ -37,7 +38,7 @@ public class JocksUserLandFunction extends JocksFunction {
         return _interpreter.executeUserLandFunction(this, arguments);
     }
 
-    public List<Token> getParameters() {
+    public List<String> getParameters() {
         return _parameters;
     }
 
@@ -49,7 +50,7 @@ public class JocksUserLandFunction extends JocksFunction {
         return _symbolTable;
     }
 
-    private final List<Token> _parameters;
+    private final List<String> _parameters;
     private final List<Statement> _statements;
     private final SymbolTable _symbolTable;
     private final Interpreter _interpreter;

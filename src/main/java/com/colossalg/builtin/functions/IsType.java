@@ -10,7 +10,8 @@ import java.util.List;
 // https://stackoverflow.com/questions/1570073/java-instanceof-and-generics
 public class IsType<T extends JocksValue> extends JocksJavaLandFunction {
 
-    public IsType(Class<T> type) {
+    public IsType(String name, Class<T> type) {
+        super(name);
         _type = type;
     }
 
