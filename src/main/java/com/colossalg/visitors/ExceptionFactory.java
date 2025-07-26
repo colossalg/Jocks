@@ -16,35 +16,29 @@ public class ExceptionFactory {
             String format,
             Object... args
     ) {
-        final var stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("An internal error was encountered at runtime (%s, %d).\n", file, line));
-        stringBuilder.append(String.format(format, args));
-        stringBuilder.append('\n');
-        stringBuilder.append('\n');
-        stringBuilder.append("Call stack:\n");
-        final var callStackEntryInfo = _getCallStackEntryInfo.get();
-        for (final var info : callStackEntryInfo) {
-            stringBuilder.append('\t');
-            stringBuilder.append(info);
-            stringBuilder.append('\n');
-        }
-        return new RuntimeException(stringBuilder.toString());
+        final var message = String.format(format, args) + "\n\n"
+                + String.format("\tAn internal runtime error was encountered (at line %d of file '%s').\n", line, file)
+                + getCallStackEntryInfoString();
+        return new RuntimeException(message);
     }
 
     public RuntimeException createExceptionWithoutFileOrLine(String format, Object... args) {
+        final var message = String.format(format, args) + "\n\n"
+                + "\tAn internal runtime error was encountered.\n"
+                + getCallStackEntryInfoString();
+        return new RuntimeException(message);
+    }
+
+    private String getCallStackEntryInfoString() {
         final var stringBuilder = new StringBuilder();
-        stringBuilder.append("An internal error was encountered at runtime (%s, %d).\n");
-        stringBuilder.append(String.format(format, args));
-        stringBuilder.append('\n');
-        stringBuilder.append('\n');
-        stringBuilder.append("Call stack:\n");
-        final var callStackEntryInfo = _getCallStackEntryInfo.get();
-        for (final var info : callStackEntryInfo) {
+        stringBuilder.append("\tCall stack:\n");
+        for (final var info : _getCallStackEntryInfo.get()) {
+            stringBuilder.append('\t');
             stringBuilder.append('\t');
             stringBuilder.append(info);
             stringBuilder.append('\n');
         }
-        return new RuntimeException(stringBuilder.toString());
+        return stringBuilder.toString();
     }
 
     private final Supplier<List<String>> _getCallStackEntryInfo;

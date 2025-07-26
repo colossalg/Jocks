@@ -159,8 +159,9 @@ public class JocksInstance extends JocksValue {
         } else {
             throw new UnsupportedOperationException(
                     String.format(
-                            "The '%s' operator has not been overridden for the class '%s' or any of its super classes.\n" +
-                                    "\tConsider implementing the '%s' method to fix this error.",
+                            """
+                            The '%s' operator has not been overridden for the class '%s' or any of its super classes.
+                            Consider implementing the '%s' method to fix this error.""",
                             binaryOperatorTypeToSourceString(operator),
                             _class.getIdentifier(),
                             binaryOperatorTypeToMethodString(operator)));
@@ -174,8 +175,9 @@ public class JocksInstance extends JocksValue {
         } else {
             throw new UnsupportedOperationException(
                     String.format(
-                            "The '%s' operator has not been overridden for the class '%s' or any of its super classes.\n" +
-                                    "\tConsider implementing the '%s' method to fix this error.",
+                            """
+                            The '%s' operator has not been overridden for the class '%s' or any of its super classes.
+                            Consider implementing the '%s' method to fix this error.""",
                             unaryOperatorTypeToSourceString(operator),
                             _class.getIdentifier(),
                             unaryOperatorTypeToMethodString(operator)));
