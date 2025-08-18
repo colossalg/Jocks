@@ -49,15 +49,6 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
     }
 
     public Void visitClassDeclaration(ClassDeclaration statement) {
-        if (_scopes.size() != 1) {
-            _errorReporter.report(
-                    new JocksError(
-                        "Resolver",
-                        statement.getIdentifier().getFile(),
-                        statement.getIdentifier().getLine(),
-                        "Class declarations are only allowed at the global scope."));
-        }
-
         declareAndDefine(statement.getIdentifier());
 
         if (statement.getSuperClass().isPresent()) {
