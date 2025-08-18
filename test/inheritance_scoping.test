@@ -1,0 +1,48 @@
+class A {
+    fun some_method(self) {
+        print "Outer A.";
+    }
+}
+class B < A {
+    fun test(self) {
+        self.some_method();
+    }
+}
+# Test the usual case.
+{
+    var b = new B();
+    b.test();
+}
+# Test the case where super class has been redefined inside a scope.
+# B should still refer to the definition of A from when it was
+# defined itself (i.e. super class is not dynamically scoped).
+{
+    class A {
+        fun some_method(self) {
+            print "Inner A (1).";
+        }
+    }
+    var b = new B();
+    b.test();
+}
+# Test the case where we redefine B too to derive from a nested definition
+# of A. In this case the super class should be the redefined A as that is
+# the appropriate definition of A at the time of B's definition.
+{
+    class A {
+        fun some_method(self) {
+            print "Inner A (2).";
+        }
+    }
+    class B < A {
+        fun test(self) {
+            self.some_method();
+        }
+    }
+    var b = new B();
+    b.test();
+}
+---* EXPECT *---
+Outer A.
+Outer A.
+Inner A (2).
