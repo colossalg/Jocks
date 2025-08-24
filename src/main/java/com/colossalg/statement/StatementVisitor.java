@@ -17,6 +17,10 @@ public interface StatementVisitor<T> {
 
     T visitForStatement(ForStatement statement);
 
+    T visitTryCatchStatement(TryCatchStatement statement);
+
+    T visitThrowStatement(ThrowStatement statement);
+
     T visitBlockStatement(BlockStatement statement);
 
     T visitReturnStatement(ReturnStatement statement);

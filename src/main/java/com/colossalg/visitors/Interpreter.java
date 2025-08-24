@@ -177,6 +177,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     }
 
     @Override
+    public Void visitTryCatchStatement(TryCatchStatement statement) {
+        return null; // TODO
+    }
+
+    @Override
+    public Void visitThrowStatement(ThrowStatement statement) {
+        return null; // TODO
+    }
+
+    @Override
     public Void visitBlockStatement(BlockStatement statement) {
         pushSymbolTable();
         visitAll(statement.getSubStatements());

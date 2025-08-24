@@ -132,8 +132,11 @@ public class Scanner {
             case "var" -> addToken(TokenType.VAR);
             case "if" -> addToken(TokenType.IF);
             case "else" -> addToken(TokenType.ELSE);
-            case "for" -> addToken(TokenType.FOR);
             case "while" -> addToken(TokenType.WHILE);
+            case "for" -> addToken(TokenType.FOR);
+            case "try" -> addToken(TokenType.TRY);
+            case "catch" -> addToken(TokenType.CATCH);
+            case "throw" -> addToken(TokenType.THROW);
             case "fun" -> addToken(TokenType.FUN);
             case "return" -> addToken(TokenType.RETURN);
             case "class" -> addToken(TokenType.CLASS);

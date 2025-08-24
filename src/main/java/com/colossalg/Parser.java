@@ -69,6 +69,7 @@ public class Parser {
                         TokenType.IF,
                         TokenType.WHILE,
                         TokenType.FOR,
+                        TokenType.TRY,
                         TokenType.PRINT,
                         TokenType.RETURN
                 )) {
@@ -149,6 +150,10 @@ public class Parser {
             return parseWhileStatement();
         } else if (match(TokenType.FOR)) {
             return parseForStatement();
+        } else if (match(TokenType.TRY)) {
+            return parseTryCatchStatement();
+        } else if (match(TokenType.THROW)) {
+            return parseThrowStatement();
         } else if (match(TokenType.LFT_BRACE)) {
             return parseBlockStatement();
         } else if (match(TokenType.RETURN)) {
@@ -222,6 +227,14 @@ public class Parser {
         final var subStatement = parseNonDeclarationStatement();
 
         return new ForStatement(initializer, condition, increment, subStatement);
+    }
+
+    private TryCatchStatement parseTryCatchStatement() throws ParserException {
+        return new TryCatchStatement(); // TODO
+    }
+
+    private ThrowStatement parseThrowStatement() throws ParserException {
+        return new ThrowStatement(); // TODO
     }
 
     private BlockStatement parseBlockStatement() throws ParserException {

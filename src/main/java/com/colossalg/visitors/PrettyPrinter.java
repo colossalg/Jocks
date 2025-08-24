@@ -130,6 +130,16 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
     }
 
     @Override
+    public String visitTryCatchStatement(TryCatchStatement statement) {
+        return ""; // TODO
+    }
+
+    @Override
+    public String visitThrowStatement(ThrowStatement statement) {
+        return ""; // TODO
+    }
+
+    @Override
     public String visitBlockStatement(BlockStatement statement) {
         final var stringBuilder = new StringBuilder();
         stringBuilder.append(getIndentationString());
