@@ -13,6 +13,11 @@ import java.util.List;
 public class Jocks {
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            usage();
+            return;
+        }
+
         final var file = args[0];
         String fileContents;
         try {
@@ -96,9 +101,8 @@ public class Jocks {
     }
 
     private static void usage() {
-        System.out.println("USAGE:");
-        System.out.println("\tjocks <file-name> [--print]");
-        System.out.println("\t\tfile-name - The file path for the source code to interpret or print.");
-        System.out.println("\t\t--print   - If specified, the source code will be pretty-printed.");
+        System.out.println("USAGE: jocks <source-file-path> [--print]");
+        System.out.println("\tsource-file-path - The file path for the source code to interpret or print.");
+        System.out.println("\t--print          - If specified, the source code will be pretty-printed.");
     }
 }
