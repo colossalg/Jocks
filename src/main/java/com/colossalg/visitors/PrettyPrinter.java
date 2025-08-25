@@ -3,7 +3,17 @@ package com.colossalg.visitors;
 import com.colossalg.expression.*;
 import com.colossalg.statement.*;
 
+import java.util.List;
+
 public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisitor<String> {
+
+    public String visitAll(List<Statement> statements) {
+        final var stringBuilder = new StringBuilder();
+        for (final var statement : statements) {
+            stringBuilder.append(visit(statement));
+        }
+        return stringBuilder.toString();
+    }
 
     @Override
     public String visit(Statement statement) {
@@ -22,15 +32,13 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
         }
         stringBuilder.append('\n');
         stringBuilder.append(getIndentationString());
-        stringBuilder.append("{\n");
-        stringBuilder.append('\n');
+        stringBuilder.append("{\n\n");
         incrementIndentation();
         for (final var method : statement.getMethods()) {
             stringBuilder.append(visit(method));
         }
         decrementIndentation();
-        stringBuilder.append("}\n");
-        stringBuilder.append('\n');
+        stringBuilder.append("}\n\n");
         return stringBuilder.toString();
     }
 
@@ -58,8 +66,7 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
         }
         decrementIndentation();
         stringBuilder.append(getIndentationString());
-        stringBuilder.append("}\n");
-        stringBuilder.append('\n');
+        stringBuilder.append("}\n\n");
         return stringBuilder.toString();
     }
 
@@ -131,12 +138,31 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
 
     @Override
     public String visitTryCatchStatement(TryCatchStatement statement) {
-        return ""; // TODO
+        final var stringBuilder = new StringBuilder();
+        stringBuilder.append(getIndentationString());
+        stringBuilder.append("try\n");
+        incrementIndentation();
+        stringBuilder.append(visit(statement.getTryStatement()));
+        decrementIndentation();
+        stringBuilder.append(getIndentationString());
+        stringBuilder.append("catch (");
+        stringBuilder.append(statement.getExceptionIdentifier().getText());
+        stringBuilder.append(")\n");
+        incrementIndentation();
+        stringBuilder.append(visit(statement.getCatchStatement()));
+        decrementIndentation();
+        return stringBuilder.toString();
     }
 
     @Override
     public String visitThrowStatement(ThrowStatement statement) {
-        return ""; // TODO
+        @SuppressWarnings("StringBufferReplaceableByString") // I prefer the consistency with the other methods.
+        final var stringBuilder = new StringBuilder();
+        stringBuilder.append(getIndentationString());
+        stringBuilder.append("throw ");
+        stringBuilder.append(visit(statement.getSubExpression()));
+        stringBuilder.append(";\n");
+        return stringBuilder.toString();
     }
 
     @Override

@@ -230,11 +230,28 @@ public class Parser {
     }
 
     private TryCatchStatement parseTryCatchStatement() throws ParserException {
-        return new TryCatchStatement(); // TODO
+        consume(TokenType.TRY);
+        final var tryStatement = parseNonDeclarationStatement();
+        consume(TokenType.CATCH);
+        consume(TokenType.LFT_PARENTHESIS);
+        final var exceptionIdentifier = peek();
+        consume(TokenType.IDENTIFIER);
+        consume(TokenType.RGT_PARENTHESIS);
+        final var catchStatement = parseNonDeclarationStatement();
+
+        return new TryCatchStatement(
+                tryStatement,
+                catchStatement,
+                exceptionIdentifier
+        );
     }
 
     private ThrowStatement parseThrowStatement() throws ParserException {
-        return new ThrowStatement(); // TODO
+        consume(TokenType.THROW);
+        final var subExpression = parseExpression();
+        consume(TokenType.SEMICOLON);
+
+        return new ThrowStatement(subExpression);
     }
 
     private BlockStatement parseBlockStatement() throws ParserException {
