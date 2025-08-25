@@ -120,12 +120,20 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
 
     @Override
     public Void visitTryCatchStatement(TryCatchStatement statement) {
-        return null; // TODO
+        visit(statement.getTryStatement());
+        begScope();
+        declareAndDefine(statement.getExceptionIdentifier());
+        visit(statement.getCatchStatement());
+        endScope();
+
+        return null;
     }
 
     @Override
     public Void visitThrowStatement(ThrowStatement statement) {
-        return null; // TODO
+        visit(statement.getSubExpression());
+
+        return null;
     }
 
     @Override

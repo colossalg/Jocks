@@ -1,0 +1,15 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun foo() {
+    throw new Exception("Thrown from foo().");
+}
+try {
+    foo();
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Thrown from foo().
