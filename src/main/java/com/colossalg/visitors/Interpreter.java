@@ -45,7 +45,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public void visitAll(List<Statement> statements) {
         for (final var statement : statements) {
             visit(statement);
-            if (_isReturning) {
+            if (_isReturning || _isThrowing) {
                 break;
             }
         }
@@ -115,10 +115,14 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitIfElseStatement(IfElseStatement statement) {
-        final var conditionResult = JocksValue.cast(visit(statement.getCondition()), JocksBool.class)
+        final var conditionResultRaw = visit(statement.getCondition());
+        if (_isThrowing) {
+            return null;
+        }
+        final var conditionResultCast = JocksValue.cast(conditionResultRaw, JocksBool.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
                         "If/else statement condition did not evaluate to type 'bool'."));
-        if (conditionResult == JocksBool.Truthy) {
+        if (conditionResultCast == JocksBool.Truthy) {
             visit(statement.getThenSubStatement());
         } else if (statement.getElseSubStatement().isPresent()) {
             visit(statement.getElseSubStatement().get());
@@ -130,16 +134,20 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitWhileStatement(WhileStatement statement) {
         // Helper lambda to evaluate condition, checking that type is JocksBool, etc.
-        final Supplier<JocksBool> evaluateCondition = () ->
-                JocksValue.cast(visit(statement.getCondition()), JocksBool.class)
-                        .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
-                                "While statement condition did not evaluate to type 'bool'."));
+        final Supplier<JocksBool> evaluateCondition = () -> {
+            final var conditionResult = visit(statement.getCondition());
+            if (_isThrowing) {
+                return JocksBool.Falsey;
+            }
+            return JocksValue.cast(conditionResult, JocksBool.class)
+                    .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
+                            "While statement condition did not evaluate to type 'bool'."));
+        };
 
         while (evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
-            if (_isReturning) {
-                break;
-            }
+            if (_isReturning) break;
+            if (_isThrowing)  break;
         }
 
         return null;
@@ -153,7 +161,11 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             if (condition.isEmpty()) {
                 return JocksBool.Truthy;
             }
-            return JocksValue.cast(visit(condition.get()), JocksBool.class)
+            final var conditionResult = visit(condition.get());
+            if (_isThrowing) {
+                return JocksBool.Falsey;
+            }
+            return JocksValue.cast(conditionResult, JocksBool.class)
                     .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
                             "For statement condition did not evaluate to type 'bool'."));
         };
@@ -162,16 +174,46 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         if (statement.getInitializer().isPresent()) {
             visit(statement.getInitializer().get());
         }
-        while (evaluateCondition.get() == JocksBool.Truthy) {
+        while (!_isThrowing && evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
-            if (_isReturning) {
-                break;
-            }
+            if (_isReturning) break;
+            if (_isThrowing)  break;
             if (statement.getIncrement().isPresent()) {
                 visit(statement.getIncrement().get());
             }
         }
         popSymbolTable();
+
+        return null;
+    }
+
+    @Override
+    public Void visitTryCatchStatement(TryCatchStatement statement) {
+        visit(statement.getTryStatement());
+
+        if (_isThrowing) {
+            pushSymbolTable();
+            _symbolTable.createVariable(statement.getExceptionIdentifier().getText(), _thrownValue);
+            _thrownValue = JocksNil.Instance;
+            _isThrowing  = false;
+            visit(statement.getCatchStatement());
+            popSymbolTable();
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void visitThrowStatement(ThrowStatement statement) {
+        final var thrownValue = visit(statement.getSubExpression());
+        // It's possible that the sub-expression might throw itself.
+        // In that case, the existing thrown value takes priority.
+        if (_isThrowing) {
+            return null;
+        }
+
+        _thrownValue = thrownValue;
+        _isThrowing  = true;
 
         return null;
     }
@@ -187,17 +229,28 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitReturnStatement(ReturnStatement statement) {
-        _returnValue = statement.getSubExpression().isPresent()
+        final var returnValue = statement.getSubExpression().isPresent()
                 ? visit(statement.getSubExpression().get())
                 : JocksNil.Instance;
+        if (_isThrowing) {
+            return null;
+        }
+
+        _returnValue = returnValue;
         _isReturning = true;
+
         return null;
     }
 
     @Override
     public Void visitPrintStatement(PrintStatement statement) {
         final var subExpressionResult = visit(statement.getSubExpression());
+        if (_isThrowing) {
+            return null;
+        }
+
         System.out.println(subExpressionResult.str());
+
         return null;
     }
 
@@ -224,18 +277,26 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                     "Invalid logical operator type '" + operator.getType().name() + "'.");
         };
 
-        final var lftSubExpressionResult = JocksValue.cast(visit(expression.getLftSubExpression()), JocksBool.class)
+        final var lftSubExpressionResult = visit(expression.getLftSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+        final var lftSubExpressionResultCast = JocksValue.cast(lftSubExpressionResult, JocksBool.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                         operator.getFile(),
                         operator.getLine(),
                         "Left sub expression of '%s' expression did not evaluate to type 'bool.",
                         expression.getOperator().getText()));
 
-        if (lftSubExpressionResult == shortCircuitValue) {
+        if (lftSubExpressionResultCast == shortCircuitValue) {
             return lftSubExpressionResult;
         }
 
-        return JocksValue.cast(visit(expression.getRgtSubExpression()), JocksBool.class)
+        final var rgtSubExpressionResult = visit(expression.getRgtSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+        return JocksValue.cast(rgtSubExpressionResult, JocksBool.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                         operator.getFile(),
                         operator.getLine(),
@@ -247,7 +308,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public JocksValue visitBinaryExpression(BinaryExpression expression) {
         final var operator = expression.getOperator();
         final var lftSubExpressionResult = visit(expression.getLftSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
         final var rgtSubExpressionResult = visit(expression.getRgtSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
         try {
             // If a user defined operator overload is being called, then update the call stack
             // entry info list so any errors triggered within will have good diagnostics
@@ -278,7 +345,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             if (lftSubExpressionResult instanceof JocksInstance) {
                 popCallStackEntryInfo();
             }
-            return result;
+            return _isThrowing
+                    ? JocksNil.Instance
+                    : result;
         } catch (UnsupportedOperationException ex) {
             // Add localization and re-throw.
             throw _exceptionFactory.createExceptionWithFileAndLine(operator.getFile(), operator.getLine(), ex.getMessage());
@@ -289,6 +358,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public JocksValue visitUnaryExpression(UnaryExpression expression) {
         final var operator = expression.getOperator();
         final var subExpressionResult = visit(expression.getSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
         try {
             // If a user defined operator overload is being called, then update the call stack
             // entry info list so any errors triggered within will have good diagnostics
@@ -312,7 +384,9 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             if (subExpressionResult instanceof JocksInstance) {
                 popCallStackEntryInfo();
             }
-            return result;
+            return _isThrowing
+                    ? JocksNil.Instance
+                    : result;
         } catch (UnsupportedOperationException ex) {
             // Add localization and re-throw.
             throw _exceptionFactory.createExceptionWithFileAndLine(operator.getFile(), operator.getLine(), ex.getMessage());
@@ -328,6 +402,10 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     public JocksValue visitDotExpression(DotExpression expression) {
         final var lhsExpressionResult = visit(expression.getLhsExpression());
         final var rhsIdentifier = expression.getRhsIdentifier();
+
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
 
         if ((lhsExpressionResult instanceof JocksInstance instance)) {
             // Return the property if it exists, otherwise return the method if it exists.
@@ -359,7 +437,12 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public JocksValue visitFunInvocation(FunInvocation expression) {
-        final var invoked = JocksValue.cast(visit(expression.getSubExpression()), JocksFunction.class)
+        final var subExpressionResult = visit(expression.getSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+
+        final var invoked = JocksValue.cast(subExpressionResult, JocksFunction.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                         expression.getFile(),
                         expression.getLine(),
@@ -379,13 +462,18 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         final var argumentResults = new ArrayList<JocksValue>();
         for (final var argumentExpression : expression.getArguments()) {
             argumentResults.add(visit(argumentExpression));
+            if (_isThrowing) {
+                return JocksNil.Instance;
+            }
         }
 
         pushCallStackEntryInfo(invoked.getName(), expression.getFile(), expression.getLine());
         final var result = invoked.call(argumentResults);
         popCallStackEntryInfo();
 
-        return result;
+        return _isThrowing
+                ? JocksNil.Instance
+                : result;
     }
 
     @Override
@@ -419,20 +507,32 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         argumentResults.add(instance);
         for (final var argumentExpression : expression.getArguments()) {
             argumentResults.add(visit(argumentExpression));
+            if (_isThrowing) {
+                return JocksNil.Instance;
+            }
         }
 
         pushCallStackEntryInfo(initMethod.getName(), expression.getFile(), expression.getLine());
         initMethod.call(argumentResults);
         popCallStackEntryInfo();
 
-        return instance;
+        return _isThrowing
+                ? JocksNil.Instance
+                : instance;
     }
 
     @Override
     public JocksValue visitVarAssignment(VarAssignment expression) {
         final var rhsResult = visit(expression.getRhsExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
         if (expression.getLhsExpression() instanceof DotExpression lhsDotExpression) {
-            final var instance = JocksValue.cast(visit(lhsDotExpression.getLhsExpression()), JocksInstance.class)
+            final var lhsResult = visit(lhsDotExpression.getLhsExpression());
+            if (_isThrowing) {
+                return JocksNil.Instance;
+            }
+            final var instance = JocksValue.cast(lhsResult, JocksInstance.class)
                     .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                             lhsDotExpression.getRhsIdentifier().getFile(),
                             lhsDotExpression.getRhsIdentifier().getLine(),
@@ -524,4 +624,6 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     private SymbolTable _symbolTable = new SymbolTable(null, _exceptionFactory);
     private JocksValue _returnValue = JocksNil.Instance;
     private boolean _isReturning = false;
+    private JocksValue _thrownValue = JocksNil.Instance;
+    private boolean _isThrowing = false;
 }

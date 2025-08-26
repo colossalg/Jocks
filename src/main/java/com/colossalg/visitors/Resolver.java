@@ -44,10 +44,12 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         }
     }
 
+    @Override
     public Void visit(Statement statement) {
         return statement.accept(this);
     }
 
+    @Override
     public Void visitClassDeclaration(ClassDeclaration statement) {
         declareAndDefine(statement.getIdentifier());
 
@@ -70,6 +72,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitFunDeclaration(FunDeclaration statement) {
         declareAndDefine(statement.getIdentifier());
         visitFunDeclarationBody(statement);
@@ -77,6 +80,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitVarDeclaration(VarDeclaration statement) {
         declare(statement.getIdentifier());
         visit(statement.getExpression());
@@ -85,6 +89,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitIfElseStatement(IfElseStatement statement) {
         visit(statement.getCondition());
         visit(statement.getThenSubStatement());
@@ -93,6 +98,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitWhileStatement(WhileStatement statement) {
         visit(statement.getCondition());
         visit(statement.getSubStatement());
@@ -100,6 +106,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitForStatement(ForStatement statement) {
         begScope();
         visitIfNotNull(statement.getInitializer().orElse(null));
@@ -111,6 +118,25 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
+    public Void visitTryCatchStatement(TryCatchStatement statement) {
+        visit(statement.getTryStatement());
+        begScope();
+        declareAndDefine(statement.getExceptionIdentifier());
+        visit(statement.getCatchStatement());
+        endScope();
+
+        return null;
+    }
+
+    @Override
+    public Void visitThrowStatement(ThrowStatement statement) {
+        visit(statement.getSubExpression());
+
+        return null;
+    }
+
+    @Override
     public Void visitBlockStatement(BlockStatement statement) {
         begScope();
         for (final var subStatement : statement.getSubStatements()) {
@@ -121,6 +147,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitReturnStatement(ReturnStatement statement) {
         if (!_isWithinFun) {
             _errorReporter.report(
@@ -135,22 +162,26 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitPrintStatement(PrintStatement statement) {
         visit(statement.getSubExpression());
 
         return null;
     }
 
+    @Override
     public Void visitExpressionStatement(ExpressionStatement statement) {
         visit(statement.getSubExpression());
 
         return null;
     }
 
+    @Override
     public Void visit(Expression expression) {
         return expression.accept(this);
     }
 
+    @Override
     public Void visitLogicalExpression(LogicalExpression expression) {
         visit(expression.getLftSubExpression());
         visit(expression.getRgtSubExpression());
@@ -158,6 +189,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitBinaryExpression(BinaryExpression expression) {
         visit(expression.getLftSubExpression());
         visit(expression.getRgtSubExpression());
@@ -165,24 +197,28 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitUnaryExpression(UnaryExpression expression) {
         visit(expression.getSubExpression());
 
         return null;
     }
 
+    @Override
     public Void visitGroupingExpression(GroupingExpression expression) {
         visit(expression.getSubExpression());
 
         return null;
     }
 
+    @Override
     public Void visitDotExpression(DotExpression expression) {
         visit(expression.getLhsExpression());
 
         return null;
     }
 
+    @Override
     public Void visitFunInvocation(FunInvocation expression) {
         visit(expression.getSubExpression());
         for (final var argument : expression.getArguments()) {
@@ -192,6 +228,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitNewInvocation(NewInvocation expression) {
         expression.setSymbolTableDepth(
                 getIdentifierSymbolTableDepth(expression.getIdentifier()));
@@ -203,6 +240,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitVarAssignment(VarAssignment expression) {
         visit(expression.getLhsExpression());
         visit(expression.getRhsExpression());
@@ -210,6 +248,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitVarExpression(VarExpression expression) {
         expression.setSymbolTableDepth(
                 getIdentifierSymbolTableDepth(expression.getIdentifier()));
@@ -217,6 +256,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
         return null;
     }
 
+    @Override
     public Void visitLiteralExpression(LiteralExpression expression) {
         return null;
     }

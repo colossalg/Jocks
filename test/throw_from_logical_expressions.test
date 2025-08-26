@@ -1,0 +1,175 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun get_x(x) {
+    print "Get x";
+    return x;
+}
+fun get_x_throws(x) {
+    print "Get x (throwing)";
+    throw new Exception("Thrown");
+    return x;
+}
+print "# -----------------------------------------------------------------#";
+print "#    Test OR works (including short circuit)                       #";
+print "# -----------------------------------------------------------------#";
+try {
+    print "OR throw in operand 1 (1)";
+    print get_x_throws(true) or get_x(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 1 (2)";
+    print get_x_throws(true) or get_x(false);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 1 (3)";
+    print get_x_throws(false) or get_x(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 1 (4)";
+    print get_x_throws(false) or get_x(false);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 2 (1)";
+    print get_x(true) or get_x_throws(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 2 (2)";
+    print get_x(true) or get_x_throws(false);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 2 (3)";
+    print get_x(false) or get_x_throws(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "OR throw in operand 2 (4)";
+    print get_x(false) or get_x_throws(false);
+} catch (e) {
+    print e.what;
+}
+print "# -----------------------------------------------------------------#";
+print "#    Test AND works (including short circuit)                      #";
+print "# -----------------------------------------------------------------#";
+try {
+    print "AND throw in operand 1 (1)";
+    print get_x_throws(true) and get_x(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 1 (2)";
+    print get_x_throws(true) and get_x(false);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 1 (3)";
+    print get_x_throws(false) and get_x(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 1 (4)";
+    print get_x_throws(false) and get_x(false);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 2 (1)";
+    print get_x(true) and get_x_throws(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 2 (2)";
+    print get_x(true) and get_x_throws(false);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 2 (3)";
+    print get_x(false) and get_x_throws(true);
+} catch (e) {
+    print e.what;
+}
+try {
+    print "AND throw in operand 2 (4)";
+    print get_x(false) and get_x_throws(false);
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+# -----------------------------------------------------------------#
+#    Test OR works (including short circuit)                       #
+# -----------------------------------------------------------------#
+OR throw in operand 1 (1)
+Get x (throwing)
+Thrown
+OR throw in operand 1 (2)
+Get x (throwing)
+Thrown
+OR throw in operand 1 (3)
+Get x (throwing)
+Thrown
+OR throw in operand 1 (4)
+Get x (throwing)
+Thrown
+OR throw in operand 2 (1)
+Get x
+true
+OR throw in operand 2 (2)
+Get x
+true
+OR throw in operand 2 (3)
+Get x
+Get x (throwing)
+Thrown
+OR throw in operand 2 (4)
+Get x
+Get x (throwing)
+Thrown
+# -----------------------------------------------------------------#
+#    Test AND works (including short circuit)                      #
+# -----------------------------------------------------------------#
+AND throw in operand 1 (1)
+Get x (throwing)
+Thrown
+AND throw in operand 1 (2)
+Get x (throwing)
+Thrown
+AND throw in operand 1 (3)
+Get x (throwing)
+Thrown
+AND throw in operand 1 (4)
+Get x (throwing)
+Thrown
+AND throw in operand 2 (1)
+Get x
+Get x (throwing)
+Thrown
+AND throw in operand 2 (2)
+Get x
+Get x (throwing)
+Thrown
+AND throw in operand 2 (3)
+Get x
+false
+AND throw in operand 2 (4)
+Get x
+false

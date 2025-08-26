@@ -1,0 +1,22 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun get_name() {
+    throw new Exception("Thrown");
+    return "???";
+}
+var name = "John Doe";
+try {
+    print name;
+    name = get_name();
+    print name;
+} catch (e) {
+    print e.what;
+}
+print name;
+---* EXPECT *---
+John Doe
+Thrown
+John Doe

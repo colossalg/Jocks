@@ -1,0 +1,20 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun condition() {
+    throw new Exception("Thrown from condition.");
+    return true;
+}
+try {
+    if (condition()) {
+        print "If branch.";
+    } else {
+        print "Else branch.";
+    }
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Thrown from condition.

@@ -1,0 +1,41 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun initialise(i) {
+    print "Initialise " + to_string(i);
+    return i;
+}
+fun condition(i) {
+    print "Condition " + to_string(i);
+    return i < 10;
+}
+fun increment(i) {
+    print "Increment " + to_string(i);
+    return i + 1;
+}
+try {
+    for (var i = initialise(0); condition(i); i = increment(i)) {
+        print "Body " + to_string(i);
+        if (i == 3) {
+            throw new Exception("Thrown from loop, i = " + to_string(i));
+        }
+    }
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Initialise 0.0
+Condition 0.0
+Body 0.0
+Increment 0.0
+Condition 1.0
+Body 1.0
+Increment 1.0
+Condition 2.0
+Body 2.0
+Increment 2.0
+Condition 3.0
+Body 3.0
+Thrown from loop, i = 3.0

@@ -1,0 +1,21 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun foo() {
+    throw new Exception("Thrown from foo().");
+}
+try {
+    try {
+        foo();
+    } catch (e) {
+        print "Inner: '" + e.what + "'";
+    }
+    foo();
+} catch (e) {
+    print "Outer: '" + e.what + "'";
+}
+---* EXPECT *---
+Inner: 'Thrown from foo().'
+Outer: 'Thrown from foo().'

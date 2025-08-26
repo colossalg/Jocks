@@ -1,0 +1,32 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun get_x() {
+    print "Getting x";
+    return 1.0;
+}
+fun get_y() {
+    print "Getting y";
+    throw new Exception("Thrown");
+    return 2.0;
+}
+fun get_z() {
+    print "Getting z";
+    return 3.0;
+}
+fun get_distance(x, y, z) {
+    print "Getting distance";
+    return pow((x * x + y * y + z * z), 0.5);
+}
+try {
+    var distance = get_distance(get_x(), get_y(), get_z());
+    print "Distance = " + to_string(distance);
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Getting x
+Getting y
+Thrown

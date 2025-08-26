@@ -32,7 +32,7 @@ public class JocksString extends JocksValue {
     @Override
     public JocksValue add(JocksValue other) {
         if (!(other instanceof JocksString)) {
-            throw new IllegalArgumentException("Argument 'other' must have type JocksString, was '" + other.getClass().getName() + "'.");
+            throw new UnsupportedOperationException("Argument 'other' must have type JocksString, was '" + other.getClass().getName() + "'.");
         }
 
         return new JocksString(_data + ((JocksString)other)._data);

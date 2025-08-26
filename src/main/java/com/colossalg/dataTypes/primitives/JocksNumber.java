@@ -93,7 +93,7 @@ public class JocksNumber extends JocksValue {
 
     private void assertOtherIsJocksNumber(JocksValue other) {
         if (!(other instanceof JocksNumber)) {
-            throw new IllegalArgumentException("Argument 'other' must have type JocksNumber, was '" + other.getClass().getName() + "'.");
+            throw new UnsupportedOperationException("Argument 'other' must have type JocksNumber, was '" + other.getClass().getName() + "'.");
         }
     }
 
