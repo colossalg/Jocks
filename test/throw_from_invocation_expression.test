@@ -1,2 +1,31 @@
-# TODO
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun outer() {
+    fun inner() {
+        print "Inner";
+    }
+    print "Outer";
+    return inner;
+}
+fun outer_throwing() {
+    fun inner_throwing() {
+        print "Inner (throwing)";
+    }
+    print "Outer (throwing)";
+    throw new Exception("Thrown");
+    return inner_throwing;
+}
+try {
+    outer()();
+    outer_throwing()();
+} catch (e) {
+    print e.what;
+}
 ---* EXPECT *---
+Outer
+Inner
+Outer (throwing)
+Thrown

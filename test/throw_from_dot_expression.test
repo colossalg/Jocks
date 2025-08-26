@@ -1,2 +1,32 @@
-# TODO
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+class Person {
+    fun __init__(self, first_name, last_name) {
+        self.first_name = first_name;
+        self.last_name  = last_name;
+    }
+    fun get_full_name(self) {
+        return self.first_name + " " + self.last_name;
+    }
+}
+fun make_person(first_name, last_name) {
+    return new Person(first_name, last_name);
+}
+fun make_person_throws(first_name, last_name) {
+    throw new Exception("Thrown");
+    return make_person(first_name, last_name);
+}
+try {
+    var first_name = "John";
+    var last_name  = "Doe";
+    print make_person(first_name, last_name).get_full_name();
+    print make_person_throws(first_name, last_name).get_full_name();
+} catch (e) {
+    print e.what;
+}
 ---* EXPECT *---
+John Doe
+Thrown

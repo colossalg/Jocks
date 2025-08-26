@@ -277,33 +277,31 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
                     "Invalid logical operator type '" + operator.getType().name() + "'.");
         };
 
-        final var lftSubExpressionResult = JocksValue.cast(visit(expression.getLftSubExpression()), JocksBool.class)
+        final var lftSubExpressionResult = visit(expression.getLftSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+        final var lftSubExpressionResultCast = JocksValue.cast(lftSubExpressionResult, JocksBool.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                         operator.getFile(),
                         operator.getLine(),
                         "Left sub expression of '%s' expression did not evaluate to type 'bool.",
                         expression.getOperator().getText()));
 
-        if (_isThrowing) {
-            return JocksNil.Instance;
-        }
-
-        if (lftSubExpressionResult == shortCircuitValue) {
+        if (lftSubExpressionResultCast == shortCircuitValue) {
             return lftSubExpressionResult;
         }
 
-        final var rgtSubExpressionResult = JocksValue.cast(visit(expression.getRgtSubExpression()), JocksBool.class)
+        final var rgtSubExpressionResult = visit(expression.getRgtSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+        return JocksValue.cast(rgtSubExpressionResult, JocksBool.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                         operator.getFile(),
                         operator.getLine(),
                         "Right sub expression of '%s' expression did not evaluate to type 'bool.",
                         expression.getOperator().getText()));
-
-        if (_isThrowing) {
-            return JocksNil.Instance;
-        }
-
-        return rgtSubExpressionResult;
     }
 
     @Override

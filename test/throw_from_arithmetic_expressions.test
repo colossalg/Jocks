@@ -12,9 +12,9 @@ fun get_x_throws() {
     throw new Exception("Thrown");
     return 2.0;
 }
-# -----------------------------------------------------------------
-# Test addition works
-# -----------------------------------------------------------------
+print "# -----------------------------------------------------------------#";
+print "#    Test addition works                                           #";
+print "# -----------------------------------------------------------------#";
 try {
     print "Addition throw in operand 1";
     print get_x_throws() + get_x();
@@ -27,9 +27,9 @@ try {
 } catch (e) {
     print e.what;
 }
-# -----------------------------------------------------------------
-# Test Subtraction works
-# -----------------------------------------------------------------
+print "# -----------------------------------------------------------------#";
+print "#    Test subtraction works                                        #";
+print "# -----------------------------------------------------------------#";
 try {
     print "Subtraction throw in operand 1";
     print get_x_throws() - get_x();
@@ -42,9 +42,9 @@ try {
 } catch (e) {
     print e.what;
 }
-# -----------------------------------------------------------------
-# Test multiplication works
-# -----------------------------------------------------------------
+print "# -----------------------------------------------------------------#";
+print "#    Test multiplication works                                     #";
+print "# -----------------------------------------------------------------#";
 try {
     print "Multiplication throw in operand 1";
     print get_x_throws() * get_x();
@@ -57,9 +57,9 @@ try {
 } catch (e) {
     print e.what;
 }
-# -----------------------------------------------------------------
-# Test Division works
-# -----------------------------------------------------------------
+print "# -----------------------------------------------------------------#";
+print "#    Test division works                                           #";
+print "# -----------------------------------------------------------------#";
 try {
     print "Division throw in operand 1";
     print get_x_throws() / get_x();
@@ -73,6 +73,9 @@ try {
     print e.what;
 }
 ---* EXPECT *---
+# -----------------------------------------------------------------#
+#    Test addition works                                           #
+# -----------------------------------------------------------------#
 Addition throw in operand 1
 Get x (throwing)
 Thrown
@@ -80,6 +83,9 @@ Addition throw in operand 2
 Get x
 Get x (throwing)
 Thrown
+# -----------------------------------------------------------------#
+#    Test subtraction works                                        #
+# -----------------------------------------------------------------#
 Subtraction throw in operand 1
 Get x (throwing)
 Thrown
@@ -87,6 +93,9 @@ Subtraction throw in operand 2
 Get x
 Get x (throwing)
 Thrown
+# -----------------------------------------------------------------#
+#    Test multiplication works                                     #
+# -----------------------------------------------------------------#
 Multiplication throw in operand 1
 Get x (throwing)
 Thrown
@@ -94,6 +103,9 @@ Multiplication throw in operand 2
 Get x
 Get x (throwing)
 Thrown
+# -----------------------------------------------------------------#
+#    Test division works                                           #
+# -----------------------------------------------------------------#
 Division throw in operand 1
 Get x (throwing)
 Thrown
