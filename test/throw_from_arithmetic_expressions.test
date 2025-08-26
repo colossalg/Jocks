@@ -1,0 +1,103 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun get_x() {
+    print "Get x";
+    return 2.0;
+}
+fun get_x_throws() {
+    print "Get x (throwing)";
+    throw new Exception("Thrown");
+    return 2.0;
+}
+# -----------------------------------------------------------------
+# Test addition works
+# -----------------------------------------------------------------
+try {
+    print "Addition throw in operand 1";
+    print get_x_throws() + get_x();
+} catch (e) {
+    print e.what;
+}
+try {
+    print "Addition throw in operand 2";
+    print get_x() + get_x_throws();
+} catch (e) {
+    print e.what;
+}
+# -----------------------------------------------------------------
+# Test Subtraction works
+# -----------------------------------------------------------------
+try {
+    print "Subtraction throw in operand 1";
+    print get_x_throws() - get_x();
+} catch (e) {
+    print e.what;
+}
+try {
+    print "Subtraction throw in operand 2";
+    print get_x() - get_x_throws();
+} catch (e) {
+    print e.what;
+}
+# -----------------------------------------------------------------
+# Test multiplication works
+# -----------------------------------------------------------------
+try {
+    print "Multiplication throw in operand 1";
+    print get_x_throws() * get_x();
+} catch (e) {
+    print e.what;
+}
+try {
+    print "Multiplication throw in operand 2";
+    print get_x() * get_x_throws();
+} catch (e) {
+    print e.what;
+}
+# -----------------------------------------------------------------
+# Test Division works
+# -----------------------------------------------------------------
+try {
+    print "Division throw in operand 1";
+    print get_x_throws() / get_x();
+} catch (e) {
+    print e.what;
+}
+try {
+    print "Division throw in operand 2";
+    print get_x() / get_x_throws();
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Addition throw in operand 1
+Get x (throwing)
+Thrown
+Addition throw in operand 2
+Get x
+Get x (throwing)
+Thrown
+Subtraction throw in operand 1
+Get x (throwing)
+Thrown
+Subtraction throw in operand 2
+Get x
+Get x (throwing)
+Thrown
+Multiplication throw in operand 1
+Get x (throwing)
+Thrown
+Multiplication throw in operand 2
+Get x
+Get x (throwing)
+Thrown
+Division throw in operand 1
+Get x (throwing)
+Thrown
+Division throw in operand 2
+Get x
+Get x (throwing)
+Thrown

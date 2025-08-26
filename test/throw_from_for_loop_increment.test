@@ -1,0 +1,30 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun initialise(i) {
+    print "Initialise " + to_string(i);
+    return i;
+}
+fun condition(i) {
+    print "Condition " + to_string(i);
+    return i < 10;
+}
+fun increment(i) {
+    throw new Exception("Thrown from increment, i = " + to_string(i));
+    print "Increment " + to_string(i);
+    return i + 1;
+}
+try {
+    for (var i = initialise(0); condition(i); i = increment(i)) {
+        print "Body " + to_string(i);
+    }
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Initialise 0.0
+Condition 0.0
+Body 0.0
+Thrown from increment, i = 0.0

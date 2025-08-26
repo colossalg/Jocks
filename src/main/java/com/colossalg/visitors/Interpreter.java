@@ -115,10 +115,14 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public Void visitIfElseStatement(IfElseStatement statement) {
-        final var conditionResult = JocksValue.cast(visit(statement.getCondition()), JocksBool.class)
+        final var conditionResultRaw = visit(statement.getCondition());
+        if (_isThrowing) {
+            return null;
+        }
+        final var conditionResultCast = JocksValue.cast(conditionResultRaw, JocksBool.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
                         "If/else statement condition did not evaluate to type 'bool'."));
-        if (conditionResult == JocksBool.Truthy) {
+        if (conditionResultCast == JocksBool.Truthy) {
             visit(statement.getThenSubStatement());
         } else if (statement.getElseSubStatement().isPresent()) {
             visit(statement.getElseSubStatement().get());
@@ -130,16 +134,20 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     @Override
     public Void visitWhileStatement(WhileStatement statement) {
         // Helper lambda to evaluate condition, checking that type is JocksBool, etc.
-        final Supplier<JocksBool> evaluateCondition = () ->
-                JocksValue.cast(visit(statement.getCondition()), JocksBool.class)
-                        .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
-                                "While statement condition did not evaluate to type 'bool'."));
+        final Supplier<JocksBool> evaluateCondition = () -> {
+            final var conditionResult = visit(statement.getCondition());
+            if (_isThrowing) {
+                return JocksBool.Falsey;
+            }
+            return JocksValue.cast(conditionResult, JocksBool.class)
+                    .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
+                            "While statement condition did not evaluate to type 'bool'."));
+        };
 
         while (evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
-            if (_isReturning || _isThrowing) {
-                break;
-            }
+            if (_isReturning) break;
+            if (_isThrowing)  break;
         }
 
         return null;
@@ -153,7 +161,11 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             if (condition.isEmpty()) {
                 return JocksBool.Truthy;
             }
-            return JocksValue.cast(visit(condition.get()), JocksBool.class)
+            final var conditionResult = visit(condition.get());
+            if (_isThrowing) {
+                return JocksBool.Falsey;
+            }
+            return JocksValue.cast(conditionResult, JocksBool.class)
                     .orElseThrow(() -> _exceptionFactory.createExceptionWithoutFileOrLine(
                             "For statement condition did not evaluate to type 'bool'."));
         };
@@ -162,11 +174,10 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         if (statement.getInitializer().isPresent()) {
             visit(statement.getInitializer().get());
         }
-        while (evaluateCondition.get() == JocksBool.Truthy) {
+        while (!_isThrowing && evaluateCondition.get() == JocksBool.Truthy) {
             visit(statement.getSubStatement());
-            if (_isReturning || _isThrowing) {
-                break;
-            }
+            if (_isReturning) break;
+            if (_isThrowing)  break;
             if (statement.getIncrement().isPresent()) {
                 visit(statement.getIncrement().get());
             }

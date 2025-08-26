@@ -1,0 +1,19 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun bar() {
+    throw new Exception("Thrown from bar().");
+    return new Exception("Returned from bar().");
+}
+fun foo() {
+    throw bar();
+}
+try {
+    foo();
+} catch (e) {
+    print e.what;
+}
+---* EXPECT *---
+Thrown from bar().

@@ -3,13 +3,25 @@ class Exception {
         self.what = what;
     }
 }
-fun foo() {
+fun baz() {
     throw new Exception("Thrown from foo().");
+    print "Baz";
+}
+fun bar() {
+    baz();
+    print "Bar";
+}
+fun foo() {
+    bar();
+    print "Foo";
 }
 try {
     foo();
+    print "Called foo()";
 } catch (e) {
     print e.what;
 }
+print "Done.";
 ---* EXPECT *---
 Thrown from foo().
+Done.
