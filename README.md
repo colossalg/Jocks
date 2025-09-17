@@ -22,7 +22,7 @@ Operators
 
 **NOTE:**
 Most of the following operators (unary and binary) may be overridden for user-defined classes by implementing methods with corresponding names.
-This behaviour is described below in the corresponding **Operator Overloading** section found below.
+This behaviour is described in the corresponding **Operator Overloading** section found below.
 
 Jocks supports the following **unary** operators:
 
@@ -49,47 +49,56 @@ Jocks supports the following **binary logical** operators:
 Variables
 ---------
 
-Variables are declared using the `var` keyword, they must be assigned a value when declared.
+### Assignment Statements
 
-```JavaScript
+Variable declarations consist of the following:
+* `var` keyword.
+* The identifier for the variable (consisting of '_', letters, numbers, and starting with a non-digit character).
+* `=`.
+* The value to be assigned to the variable.
+
+```
 var variable_name = variable_value;
 ```
 
+### Assignment Expressions
+
 Assignment expressions evaluate to the value assigned to the variable.
 
-```JavaScript
+```
 var variable_name = nil;
-variable_name = variable_value; // Evaluates to the value of 'variable_value' assigned to 'variable_name'.
+variable_name = variable_value; # Evaluates to the value of 'variable_value' assigned to 'variable_name'.
 ```
 
 Variables are dynamically typed, they may be assigned values of any type even if they differ to the type initially assigned.
 
-```JavaScript
-var variable_name = nil;
-variable_name = 1.0;
-variable_name = "a";
+```
+var variable_name = 1.0;
+variable_name = 2.0;
+variable_name = "abc";
 variable_name = true;
-variable_name = new SomeClass();
+variable_name = false;
 variable_name = nil;
+variable_name = new SomeClass();
 ```
 
 Variables are lexically scoped (both global and local) as per the function/method/block they are defined in.
 Variables declared within a scope may shadow variables in an enclosing scope.
 A function declaration will also capture the variables in an enclosing scope.
-This behaviour is described below in the corresponding **Closures** section found below.
+This behaviour is described in the corresponding **Closures** section found below.
 
-```JavaScript
+```
 var a = 1;
-print a;          // 1
-print b;          // Error - variable not defined.
+print a;          # 1
+print b;          # Error - variable not defined.
 {
-    var a = 2;    // Shadows outer declaration.
+    var a = 2;    # Shadows outer declaration.
     var b = 3;
-    print a;      // 2
-    print b;      // 3
+    print a;      # 2
+    print b;      # 3
 }
-print a;          // 1
-print b;          // Error - variable not defined.
+print a;          # 1
+print b;          # Error - variable not defined.
 ```
 
 Control Flow
@@ -100,93 +109,160 @@ Jocks supports many of the usual control flow constructs found in most programmi
 * `while` loops.
 * `for` loops.
 
+These all work more or less as expected.
+
 ### If/Else Blocks
 
-`if`/`else` blocks behave as would be expected normally.
-The `else` block is optional and may be omitted entirely.
+`if`/`else` blocks consist of the following:
+* `for` keyword.
+* Opening `(`.
+* Condition expression.
+* Closing `)`.
+* 'Then' statement.
+* (BELOW ARE OPTIONAL BUT ALL REQUIRED TOGETHER)
+* `else` keyword.
+* 'Else' statement.
 
-A `condition` expression is evaluated:
-* If it is `true` the statement immediately following the parenthesis encompassing the `condition` will be executed.
-* If it is `false` the statement immediately following the `else` keyword will be executed if it is present.
+The condition expression is evaluated:
+* If it is `true`, the 'then' statement is executed.
+* If it is `false`, the 'else' statement is executed (if it is present).
 
-```Python
+Here is an `if` statement WITHOUT the optional `else` clause.
+
+```
 if (condition)
-    // Then statement ...
+    # Then statement ...
 ```
 
-```Python
+Here is an `if` statement WITH the optional `else` clause.
+
+```
 if (condition)
-    // Then statement ...
+    # Then statement ...
 else
-    // Else statement ...
+    # Else statement ...
 ```
 
 ### While Loops
 
-TODO
+`while` loops consist of the following:
+* `while` keyword.
+* Opening `(`.
+* Condition expression.
+* Closing `)`.
+* 'Loop' statement.
 
-```JavaScript
+The condition expression is evaluated at the start of each iteration:
+* If it is `true`, the loop statement will be executed.
+* If it is `false`, the loop will exit and the interpreter will continue with the next statement.
+
+```
 while (condition)
-    // Loop statement ...
+    # Loop statement ...
 ```
 
 ### For Loops
 
-TODO
+`for` loops consist of the following:
+* `for` keyword.
+* Opening `(`.
+* (Optional) The initializer, this can be an expression or a variable definition using `var`.
+* `;`
+* (Optional) Condition expression.
+* `;`
+* (Optional) Increment expression.
+* Closing `)`.
+* 'Loop' statement.
 
-```JavaScript
-for (/* optional initializer */; /* optional condition */; /* optional increment */)
-    // Loop statement ...
+The first time the loop is encountered the initializer is executed.
+If this is a variable declaration, then the variable is scoped to the loop statement.
+
+The condition expression is evaluated at the start of each iteration:
+* If it is `true`, the loop statement will be executed.
+* If it is `false`, the loop will exit and the interpreter will continue with the next statement.
+
+The increment expression is evaluated at the end of each iteration.
+
+```
+for (optional_initializer; optional_condition; optional_increment)
+    # Loop statement ...
 ```
 
-```JavaScript
+Example with a variable declaration.
+
+```
 for (var i = 0; i < 10; i = i + 1)
-    // Loop statement ...
-```
-
-```JavaScript
-for (;;)
-    // Loop statement ...
+    # Loop statement ...
 ```
 
 Print Statements
 ----------------
 
-TODO
+Print statements convert values to a string then print them to the stdout.
 
-```Python
-print some_value;
+For the primitive types this is straight forward:
+
 ```
+print 1;      # 1.0
+print 1.0;    # 1.0
+print "abc";  # abc
+print true;   # true
+print false;  # false
+print nil;    # nil
+```
+
+For functions, classes and instances they print a rough diagnostic ex. `JocksUserLandFunction(dummy)`.
+
+Classes can override how they are converted to strings by overriding the `__str__` method.
+This behaviour is described in the corresponding **Operator Overloading** section found below.
 
 Functions
 ---------
 
-TODO
+Function declarations consist of the following:
+* `fun` keyword.
+* The identifier for the function (consisting of '_', letters, numbers, and starting with a non-digit character).
+* Opening `(`.
+* The list of parameter identifiers, following normal variable naming rules and separated by `,`.
+* Closing `)`.
+* Opening `{`.
+* The function body, which is a list of statements to be executed upon function invocation.
+* Closing `}`.
 
-```JavaScript
-fun name(/* parameter list*/) {
-    // Function body ...
+The scoping rules for the function name itself are as per a normal variable.
+The parameters are scoped to the function body.
+
+```
+fun function_name(parameter_1, parameter_2, etc) {
+    # Function body ...
 }
+
+# Invocation
+function_name(arg_1, arg_2, etc);
 ```
 
-```JavaScript
-fun get_full_name(first_name, last_name) {
-    return first_name + last_name;
+Functions are first class in Jocks, they can be assigned to variables and invoked from there too.
+
+```
+fun foo() {
+    print "foo";
 }
 
-var shortcut = get_full_name;
-print shortcut("John", "Doe");
+var foo_var = foo;
+foo_var(); # foo
 ```
 
 Closures
 --------
+
+TODO
 
 Classes
 -------
 
 TODO
 
-```JavaScript
+```
 class Pet {
     fun __init__(self, owner, name, type) {
         self.owner = owner;
@@ -199,16 +275,16 @@ class Pet {
     }
 
     fun make_noise(self) {
-        // Empty
+        # Empty
     }
 }
 
 var georges_fish = new Pet("George", "Wanda", "fish");
-print georges_fish.get_description();   // Prints "George's fish Wanda".
-georges_fish.make_noise();              // Does nothing.
+print georges_fish.get_description();   # Prints "George's fish Wanda".
+georges_fish.make_noise();              # Does nothing.
 ```
 
-```JavaScript
+```
 class Cat < Pet {
     fun __init__(self, owner, name) {
         super.__init__(self, owner, name, "cat");
@@ -230,12 +306,12 @@ class Dog < Pet {
 }
 
 var carries_cat = new Cat("Carrie", "Fluffy");
-print carries_cat.get_description();            // Prints "Carrie's cat Fluffy" (inherited from Pet).
-carries_cat.make_noise();                       // Prints "Meow" (overrides Pet implementation).
+print carries_cat.get_description();            # Prints "Carrie's cat Fluffy" (inherited from Pet).
+carries_cat.make_noise();                       # Prints "Meow" (overrides Pet implementation).
 
 var debrahs_dog = new Dog("Debrah", "Spotty");
-print debrahs_dog.get_description();            // Prints "Debrah's dog Spotty" (inherited from Pet).
-debrahs_dog.make_noise();                       // Prints "Woof" (overrides Pet implementation).
+print debrahs_dog.get_description();            # Prints "Debrah's dog Spotty" (inherited from Pet).
+debrahs_dog.make_noise();                       # Prints "Woof" (overrides Pet implementation).
 ```
 
 Operator Overloading
@@ -243,78 +319,36 @@ Operator Overloading
 
 TODO
 
-```JavaScript
-class OverloadExamples {
-
-    fun __str__(self) {
-        // Implementation
-    }
-
-    fun __equal__(self, other) {
-        // Overrides comparisson in '==' binary operations.
-    }
-
-    fun __not_equal__(self, other) {
-        // Overrides comparisson in '!=' binary operations.
-    }
-
-    fun __less_than__(self, other) {
-        // Overrides comparisson in '<' binary operations.
-    }
-
-    fun __less_than_or_equal__(self, other) {
-        // Overrides comparisson in '<=' binary operations.
-    }
-
-    fun __more_than__(self, other) {
-        // Overrides comparisson in '>' binary operations.
-    }
-
-    fun __more_than_or_equal__(self, other) {
-        // Overrides comparisson in '>=' binary operations.
-    }
-
-    fun __add__(self, other) {
-        // Overrides comparisson in '+' binary operations.
-    }
-
-    fun __sub__(self, other) {
-        // Overrides comparisson in '-' binary operations.
-    }
-
-    fun __mul__(self, other) {
-        // Overrides comparisson in '*' binary operations.
-    }
-
-    fun __div__(self, other) {
-        // Overrides comparisson in '/' binary operations.
-    }
-
-    fun __unary_add__(self, other) {
-        // Overrides comparisson in '+' unary operations.
-    }
-
-    fun __unary_sub__(self, other) {
-        // Overrides comparisson in '-' unary operations.
-    }
-}
-```
+| Method Signature | Operation Overloaded |
+| --- | --- |
+| `fun __str__(self)` | String conversion for `print` statements. |
+| `fun __equal__(self, other)` | Comparisson in `==` operations. |
+| `fun __not_equal__(self, other)` | Comparisson in `!=` operations. |
+| `fun __less_than__(self, other)` | Comparisson in `<` operations. |
+| `fun __less_than_or_equal__(self, other)` | Comparisson in `<=` operations. |
+| `fun __more_than__(self, other)` | Comparisson in `>` operations. |
+| `fun __more_than_or_equal__(self, other)` | Comparisson in `>=` operations. |
+| `fun __add__(self, other)` | Comparisson in `+` operations. |
+| `fun __sub__(self, other)` | Comparisson in `-` operations. |
+| `fun __mul__(self, other)` | Comparisson in `*` operations. |
+| `fun __div__(self, other)` | Comparisson in `/` operations. |
+| `fun __unary_add__(self)` | Comparisson in `+` operations (unary). |
+| `fun __unary_sub__(self)` | Comparisson in `-` operations (unary). |
 
 Exceptions
 ----------
 
 TODO
 
-```JavaScript
+```
 fun foo() {
-    throw /* expression */;
+    throw expression;
 }
 ```
 
-```JavaScript
-try {
-    // Try statement(s) ...
-} catch (e) {
-    // Catch statement(s) ...
-}
+```
+try
+    # Try statement(s) ...
+catch (e)
+    # Catch statement(s) ...
 ```
