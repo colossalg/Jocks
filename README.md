@@ -6,62 +6,133 @@ A programming language inspired by Lox, but still a little crappy.
 Data Types
 ----------
 
-TODO
+Jocks supports several primitive data types as can be found in most dynamic programming languages:
+
+| Data Type | Example | Notes |
+| --- | --- | ---|
+| Numbers | `1`, `1.0` | There is no distinction between integer and floating point values, they are all stored as doubles internally). |
+| Strings | `"ABCD"` | Must use double quotes. |
+| Booleans | `true` / `false` | |
+| Null | `nil` | |
+
+Additionally, users may define their own types via `class` declarations (see below).
 
 Operators
 ---------
 
-TODO
+**NOTE:**
+Most of the following operators (unary and binary) may be overridden for user-defined classes by implementing methods with corresponding names.
+This behaviour is described below in the corresponding **Operator Overloading** section found below.
 
-```JavaScript
-+a;
--a;
-!a;
-```
+Jocks supports the following **unary** operators:
 
-```JavaScript
-a + b;
-a - b;
-a * b;
-a / b;
-```
+| Operator | Valid Primitive Data Types | Result |
+| --- | --- | --- |
+| `+` | Numbers | The number's value. |
+| `-` | Numbers | The number's value negated. |
+| `!` | Booleans | The boolean's value negated. |
 
-```JavaScript
-a or b;
-a and b;
-```
+Jocks supports the following **binary arithmetic** operators:
+| Operator | Valid Primitive Data Types | Result |
+| --- | --- | --- |
+| `+` | Number, string | The sum of the two numbers, or the concatenation of the two strings. |
+| `-` | Number | As expected for subtraction of two numbers. |
+| `*` | Number | As expected for multiplication of two numbers. |
+| `/` | Number | As expected for division of two numbers. |
+
+Jocks supports the following **binary logical** operators:
+| Operator | Valid Primitive Data Types | Result |
+| --- | --- | --- |
+| `or` | Boolean | As expected from 'OR'ing two booleans (short circuits if first expression is `true`). |
+| `and` | Boolean | As expected from 'AND'ing two booleans (short circuits if first expression is `false`). |
 
 Variables
 ---------
 
-TODO
+Variables are declared using the `var` keyword, they must be assigned a value when declared.
 
 ```JavaScript
-var name = val;
+var variable_name = variable_value;
+```
+
+Assignment expressions evaluate to the value assigned to the variable.
+
+```JavaScript
+var variable_name = nil;
+variable_name = variable_value; // Evaluates to the value of 'variable_value' assigned to 'variable_name'.
+```
+
+Variables are dynamically typed, they may be assigned values of any type even if they differ to the type initially assigned.
+
+```JavaScript
+var variable_name = nil;
+variable_name = 1.0;
+variable_name = "a";
+variable_name = true;
+variable_name = new SomeClass();
+variable_name = nil;
+```
+
+Variables are lexically scoped (both global and local) as per the function/method/block they are defined in.
+Variables declared within a scope may shadow variables in an enclosing scope.
+A function declaration will also capture the variables in an enclosing scope.
+This behaviour is described below in the corresponding **Closures** section found below.
+
+```JavaScript
+var a = 1;
+print a;          // 1
+print b;          // Error - variable not defined.
+{
+    var a = 2;    // Shadows outer declaration.
+    var b = 3;
+    print a;      // 2
+    print b;      // 3
+}
+print a;          // 1
+print b;          // Error - variable not defined.
 ```
 
 Control Flow
 ------------
 
-TODO
+Jocks supports many of the usual control flow constructs found in most programming languages:
+* `if`/`else` conditionals.
+* `while` loops.
+* `for` loops.
 
-```JavaScript
+### If/Else Blocks
+
+`if`/`else` blocks behave as would be expected normally.
+The `else` block is optional and may be omitted entirely.
+
+A `condition` expression is evaluated:
+* If it is `true` the statement immediately following the parenthesis encompassing the `condition` will be executed.
+* If it is `false` the statement immediately following the `else` keyword will be executed if it is present.
+
+```Python
 if (condition)
     // Then statement ...
 ```
 
-```JavaScript
-if (condition) {
+```Python
+if (condition)
     // Then statement ...
-} else {
+else
     // Else statement ...
-}
 ```
+
+### While Loops
+
+TODO
 
 ```JavaScript
 while (condition)
     // Loop statement ...
 ```
+
+### For Loops
+
+TODO
 
 ```JavaScript
 for (/* optional initializer */; /* optional condition */; /* optional increment */)
@@ -106,6 +177,9 @@ fun get_full_name(first_name, last_name) {
 var shortcut = get_full_name;
 print shortcut("John", "Doe");
 ```
+
+Closures
+--------
 
 Classes
 -------
