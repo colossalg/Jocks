@@ -1,0 +1,12 @@
+class Exception {
+    fun __init__(self, what) {
+        self.what = what;
+    }
+}
+fun foo() {
+    throw new Exception("Thrown from bar().");
+}
+foo();
+---* EXPECT *---
+ERROR - Program terminating with uncaught thrown value.
+	Consider adding a top level try/catch block to log the exception.

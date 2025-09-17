@@ -90,6 +90,10 @@ public class Jocks {
         try {
             final var interpreter = new Interpreter();
             interpreter.visitAll(statements);
+            if (interpreter.getIsThrowing()) {
+                System.out.println("ERROR - Program terminating with uncaught thrown value.");
+                System.out.println("\tConsider adding a top level try/catch block to log the exception.");
+            }
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
         }

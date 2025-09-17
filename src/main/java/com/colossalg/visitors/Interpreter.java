@@ -594,6 +594,10 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         return result;
     }
 
+    public boolean getIsThrowing() {
+        return _isThrowing;
+    }
+
     private void pushCallStackEntryInfo(String name, String line, int file) {
         _callStackEntryInfo.addLast(String.format("%s at %s:%d", name, line, file));
     }
