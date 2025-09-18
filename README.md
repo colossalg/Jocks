@@ -82,6 +82,8 @@ var variable_name = nil;
 variable_name = variable_value; # Evaluates to the value of 'variable_value' assigned to 'variable_name'.
 ```
 
+### Variable Typing
+
 Variables are dynamically typed, they may be assigned values of any type even if they differ to the type initially assigned.
 
 ```
@@ -93,6 +95,8 @@ variable_name = false;
 variable_name = nil;
 variable_name = new SomeClass();
 ```
+
+### Variable Scoping
 
 Variables are lexically scoped (both global and local) as per the function/method/block they are defined in.
 Variables declared within a scope may shadow variables in an enclosing scope.
@@ -127,9 +131,9 @@ These all work more or less as expected.
 
 `if`/`else` blocks consist of the following:
 * `for` keyword.
-* Opening `(`.
+* `(`.
 * Condition expression.
-* Closing `)`.
+* `)`.
 * 'Then' statement.
 * (BELOW ARE OPTIONAL BUT ALL REQUIRED TOGETHER)
 * `else` keyword.
@@ -159,9 +163,9 @@ else
 
 `while` loops consist of the following:
 * `while` keyword.
-* Opening `(`.
+* `(`.
 * Condition expression.
-* Closing `)`.
+* `)`.
 * 'Loop' statement.
 
 The condition expression is evaluated at the start of each iteration:
@@ -177,13 +181,13 @@ while (condition)
 
 `for` loops consist of the following:
 * `for` keyword.
-* Opening `(`.
+* `(`.
 * (Optional) The initializer, this can be an expression or a variable definition using `var`.
 * `;`
 * (Optional) Condition expression.
 * `;`
 * (Optional) Increment expression.
-* Closing `)`.
+* `)`.
 * 'Loop' statement.
 
 The first time the loop is encountered the initializer is executed.
@@ -231,15 +235,17 @@ This behaviour is described in the corresponding **Operator Overloading** sectio
 Functions
 ---------
 
-Function declarations consist of the following:
+### Function Declarations
+
+`fun` declarations consist of the following:
 * `fun` keyword.
 * The identifier for the function (consisting of '_', letters, numbers, and starting with a non-digit character).
-* Opening `(`.
+* `(`.
 * The list of parameter identifiers, following normal variable naming rules and separated by `,`.
-* Closing `)`.
-* Opening `{`.
+* `)`.
+* `{`.
 * The function body, which is a list of statements to be executed upon function invocation.
-* Closing `}`.
+* `}`.
 
 The scoping rules for the function name itself are as per a normal variable.
 The parameters are scoped to the function body.
@@ -264,8 +270,7 @@ var foo_var = foo;
 foo_var(); # foo
 ```
 
-Closures
---------
+### Closures
 
 When a function is declared it captures the surrounding context.
 This behaviour facilitates closures which can be useful under several contexts.
@@ -292,7 +297,20 @@ while (counter() < 10) {
 Classes
 -------
 
-TODO
+### Class Declarations
+
+`class` declarations consist of the following:
+* `class` keyword.
+* The identifier for the `class` (consisting of '_', letters, numbers, and starting with a non-digit character).
+* (Optional) `<` followed by an identifier for a `super` `class` to inherit from.
+* `{`
+* A list of method declarations, each following the declaration of a function.
+  If these are to be called on an instance, then the first parameter should be a 'self' parameter for the instance.
+  See the section on binding below.
+  Otherwise, the method should only be called statically on the class itself.
+* `}`
+
+This is best illustrated using an example:
 
 ```
 class Pet {
@@ -315,6 +333,15 @@ var georges_fish = new Pet("George", "Wanda", "fish");
 print georges_fish.get_description();   # Prints "George's fish Wanda".
 georges_fish.make_noise();              # Does nothing.
 ```
+
+It is good to mention that a `class` is also first class in Jocks, just as functions are.
+It is may be assigned to variables and used as normal.
+
+### Inheritance
+
+If a `class` declaration includes a `super` `class`, to inherit from, then all methods available within the `super` class will be available to the `class`, and all of its instances. Finding the appropriate method to invoke on a class or instance is similar to the behaviour of languages such as JavaScript. The classes form a chain which is walked at runtime from the instance or `class` the method was invoked on until a `class` declaring that method is finally found. A `class` may wish to delegate fully or parially to the `super` `class`, however, especially in the `__init__` method. This is possible using `super` which is not a keyword but a variable available from the context of all class method declarations.
+
+This is all best shown using an example:
 
 ```
 class Cat < Pet {
@@ -346,8 +373,44 @@ print debrahs_dog.get_description();            # Prints "Debrah's dog Spotty" (
 debrahs_dog.make_noise();                       # Prints "Woof" (overrides Pet implementation).
 ```
 
-Operator Overloading
---------------------
+### Instances
+
+Instances are created using the `new` keyword.
+This works by creating a fresh instance and assigning it the corresponding `class`.
+The `__init__` method is then automatically invoked on this instance, forwarding all parameters passed to the `new` expression.
+This works because instances may be assigned properties dynamically at run-time, and have no access control modifiers (they are public).
+
+### Dot Expressions
+
+The behaviour of `.` expressions are different based upon whether it is performed on a `class` or instance.
+* On a `class`, the appropriate method is found and returned as normal with no additional steps.
+* On an instance, the appropriate method is 'found and bound', then this bound method returned.
+
+The 'binding' process on an instance works by:
+* Capturing the instance the method was invoked on.
+* Wrapping a method in a function that will pass the instance as the first parameter.
+* The bound method is just a normal function, it's first class and can be assigned, etc. as normal.
+
+This is well illustrated using an example:
+
+```
+class Person {
+    fun __init__(self, fname, lname) {
+        self.fname = fname;
+        self.lname = lname;
+    }
+
+    fun get_full_name(self) {
+        return self.fname + " " + self.lname;
+    }
+}
+
+var p = new Person("John", "Doe");
+var full_name = p.get_full_name; # This is a bound method, it captures p in the context.
+print full_name(); # John Doe
+```
+
+### Operator Overloading
 
 Classes may override many of the common operators (both binary and unary) by defining methods with corresponding names.
 
@@ -414,12 +477,12 @@ throw value_producing_expression;
 
 `try`/`catch` blocks consist of the following:
 * `try` keyword.
-* The 'try' statement to be executed which may `throw` from somewhere during execution.
+* The `try` statement to be executed which may `throw` from somewhere during execution.
 * `catch` keyword.
-* Opening `(`.
+* `(`.
 * An identifier for the variable representing any caught value.
-* Closing `)`.
-* The 'catch' statement to be executed if any value is caught.
+* `)`.
+* The `catch` statement to be executed if any value is caught.
 
 Within the 'try' statements, if any value is thrown, then execution of the 'try' statement will cease from the point of the `throw` statement.
 The thrown value will then be assigned to the identifier trailing the `catch` keyword (this variable is scoped to the catch statement).
