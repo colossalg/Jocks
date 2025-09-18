@@ -267,7 +267,27 @@ foo_var(); # foo
 Closures
 --------
 
-TODO
+When a function is declared it captures the surrounding context.
+This behaviour facilitates closures which can be useful under several contexts.
+Here's an example:
+
+```
+fun make_counter() {
+    var count = 0;
+    fun counter() {
+        # Count is captured from the context above, and
+        # is available even after make_counter returns.
+        count = count + 1;
+        return count - 1;
+    }
+    return counter;
+}
+
+var counter = make_counter();
+while (counter() < 10) {
+    print "Another"; # Will execute 10 times.
+}
+```
 
 Classes
 -------
