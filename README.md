@@ -317,7 +317,7 @@ debrahs_dog.make_noise();                       # Prints "Woof" (overrides Pet i
 Operator Overloading
 --------------------
 
-TODO
+Classes may override many of the common operators (both binary and unary) by defining methods with corresponding names.
 
 | Method Signature | Operation Overloaded |
 | --- | --- |
@@ -334,6 +334,41 @@ TODO
 | `fun __div__(self, other)` | Comparisson in `/` operations. |
 | `fun __unary_add__(self)` | Comparisson in `+` operations (unary). |
 | `fun __unary_sub__(self)` | Comparisson in `-` operations (unary). |
+
+For the binary operations, the operation is considered to be triggered on the left operand.
+This is best illustrated with an example:
+
+```
+var a = new A();
+var b = new B();
+var result = a + b; # This will trigger A.__add__ with a assigned to self, and b assigned to other.
+```
+
+An example of operator overloading may be 2D points where several arithmetic operations make sense:
+
+```
+class Point2D {
+    fun __init__(self, x, y) {
+        self.x = x;
+        self.y = y;
+    }
+
+    fun __str__(self) {
+        return "Point2D { x = " + to_string(self.x) + ", y = " + to_string(self.y) + " }";
+    }
+
+    fun __add__(self, other) {
+        # Note it is hard to secure binary operator functions correctly at present
+        # as a good means to check the class name for an instance is lacking.
+        return new Point2D(self.x + other.x, self.y + other.y);
+    }
+}
+
+var p1 = new Point2D(1, 2);
+var p2 = new Point2D(3, 4);
+var p3 = p1 + p2;
+print p3; # Point2D { x = 3.0, y = 4.0 }
+```
 
 Exceptions
 ----------
