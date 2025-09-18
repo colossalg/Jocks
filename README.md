@@ -1,7 +1,19 @@
-Jocks
-=====
+<p align="center">
+    <img
+        width="240"
+        height="240"
+        alt="JocksLogo"
+        src="https://github.com/user-attachments/assets/3a64a874-5a12-463f-b741-129340f021cf"
+    />
+</p>
+<p align="center">
+    A programming language inspired by Lox, but still a little crappy.
+</p>
+<p align="center">
+    Learn more about Lox in <a href="https://craftinginterpreters.com/">Crafting Interpreters</a>.
+</p>
 
-A programming language inspired by Lox, but still a little crappy.
+
 
 Data Types
 ----------
