@@ -338,13 +338,25 @@ TODO
 Exceptions
 ----------
 
-TODO
+A value may be thrown using the `throw` keyword followed by an expression to produce the thrown value and a terminating `;`.
+Values of any type may be thrown, and currently there is no way to distinguish by type when deciding whether to catch a thrown value.
 
 ```
-fun foo() {
-    throw expression;
-}
+throw value_producing_expression;
 ```
+
+`try`/`catch` blocks consist of the following:
+* `try` keyword.
+* The 'try' statement to be executed which may `throw` from somewhere during execution.
+* `catch` keyword.
+* Opening `(`.
+* An identifier for the variable representing any caught value.
+* Closing `)`.
+* The 'catch' statement to be executed if any value is caught.
+
+Within the 'try' statements, if any value is thrown, then execution of the 'try' statement will cease from the point of the `throw` statement.
+The thrown value will then be assigned to the identifier trailing the `catch` keyword (this variable is scoped to the catch statement).
+The 'catch' statement will then be executed (if no `throw` happens in the 'try' statement the 'catch' statement will never ececute).
 
 ```
 try
