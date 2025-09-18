@@ -339,7 +339,7 @@ It is may be assigned to variables and used as normal.
 
 ### Inheritance
 
-If a `class` declaration includes a `super` `class`, to inherit from, then all methods available within the `super` class will be available to the `class`, and all of its instances. Finding the appropriate method to invoke on a class or instance is similar to the behaviour of languages such as JavaScript. The classes form a chain which is walked at runtime from the instance or `class` the method was invoked on until a `class` declaring that method is finally found. A `class` may wish to delegate fully or parially to the `super` `class`, however, especially in the `__init__` method. This is possible using `super` which is not a keyword but a variable available from the context of all class method declarations.
+If a `class` declaration includes a `super` `class`, to inherit from, then all methods available within the `super` class will be available to the `class`, and all of its instances. Finding the appropriate method to invoke on a class or instance is similar to the behaviour of languages such as JavaScript. The classes form a chain which is walked at runtime from the instance or `class` the method was invoked on until a `class` declaring that method is finally found. A `class` may wish to delegate fully or partially to the `super` `class`, however, especially in the `__init__` method. This is possible using `super` which is not a keyword but a variable available from the context of all `class` method declarations.
 
 This is all best shown using an example:
 
