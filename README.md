@@ -88,12 +88,12 @@ Variables are dynamically typed, they may be assigned values of any type even if
 
 ```
 var variable_name = 1.0;
-variable_name = 2.0;
-variable_name = "abc";
-variable_name = true;
-variable_name = false;
-variable_name = nil;
-variable_name = new SomeClass();
+variable_name     = 2.0;
+variable_name     = "abc";
+variable_name     = true;
+variable_name     = false;
+variable_name     = nil;
+variable_name     = new SomeClass();
 ```
 
 ### Variable Scoping
@@ -125,38 +125,38 @@ Jocks supports many of the usual control flow constructs found in most programmi
 * `while` loops.
 * `for` loops.
 
-These all work more or less as expected.
+These all work as expected for other languages.
 
 ### If/Else Blocks
 
 `if`/`else` blocks consist of the following:
-* `for` keyword.
+* `if` keyword.
 * `(`.
 * Condition expression.
 * `)`.
-* 'Then' statement.
+* `if` statement.
 * (BELOW ARE OPTIONAL BUT ALL REQUIRED TOGETHER)
 * `else` keyword.
-* 'Else' statement.
+* `else` statement.
 
 The condition expression is evaluated:
-* If it is `true`, the 'then' statement is executed.
-* If it is `false`, the 'else' statement is executed (if it is present).
+* If it evaluates to `true` then the `if` statement is executed.
+* If it evaluates to `false` then the `else` statement is executed (if it is present).
 
 Here is an `if` statement WITHOUT the optional `else` clause.
 
 ```
 if (condition)
-    # Then statement ...
+    # if statement ...
 ```
 
 Here is an `if` statement WITH the optional `else` clause.
 
 ```
 if (condition)
-    # Then statement ...
+    # if statement ...
 else
-    # Else statement ...
+    # else statement ...
 ```
 
 ### While Loops
@@ -166,10 +166,10 @@ else
 * `(`.
 * Condition expression.
 * `)`.
-* 'Loop' statement.
+* The loop body (statement).
 
 The condition expression is evaluated at the start of each iteration:
-* If it is `true`, the loop statement will be executed.
+* If it is `true`, the loop body will be executed.
 * If it is `false`, the loop will exit and the interpreter will continue with the next statement.
 
 ```
@@ -188,13 +188,13 @@ while (condition)
 * `;`
 * (Optional) Increment expression.
 * `)`.
-* 'Loop' statement.
+* Loop body.
 
-The first time the loop is encountered the initializer is executed.
+The initializer is executed once at the start of the first iteration.
 If this is a variable declaration, then the variable is scoped to the loop statement.
 
 The condition expression is evaluated at the start of each iteration:
-* If it is `true`, the loop statement will be executed.
+* If it is `true`, the loop body will be executed.
 * If it is `false`, the loop will exit and the interpreter will continue with the next statement.
 
 The increment expression is evaluated at the end of each iteration.
@@ -208,13 +208,13 @@ Example with a variable declaration.
 
 ```
 for (var i = 0; i < 10; i = i + 1)
-    # Loop statement ...
+    # Loop statement (i is scoped to here) ...
 ```
 
 Print Statements
 ----------------
 
-Print statements convert values to a string then print them to the stdout.
+`print` statements convert values to a string then print them to `stdout`.
 
 For the primitive types this is straight forward:
 
@@ -274,6 +274,7 @@ foo_var(); # foo
 
 When a function is declared it captures the surrounding context.
 This behaviour facilitates closures which can be useful under several contexts.
+
 Here's an example:
 
 ```
@@ -339,7 +340,11 @@ It is may be assigned to variables and used as normal.
 
 ### Inheritance
 
-If a `class` declaration includes a `super` `class`, to inherit from, then all methods available within the `super` class will be available to the `class`, and all of its instances. Finding the appropriate method to invoke on a class or instance is similar to the behaviour of languages such as JavaScript. The classes form a chain which is walked at runtime from the instance or `class` the method was invoked on until a `class` declaring that method is finally found. A `class` may wish to delegate fully or partially to the `super` `class`, however, especially in the `__init__` method. This is possible using `super` which is not a keyword but a variable available from the context of all `class` method declarations.
+If a `class` declaration includes a `super` `class`, to inherit from, then all methods available within the `super` `class` will be available to the `class`, and all of its instances.
+Finding the appropriate method to invoke on a class or instance is similar to the behaviour of languages such as JavaScript.
+The classes form a chain which is walked at runtime from the instance or `class` the method was invoked on until a `class` declaring that method is finally found.
+A `class` may wish to delegate fully or partially to the `super` `class`, however, especially in the `__init__` method.
+This is possible using `super` which is not a keyword but a variable available from the context of all `class` method declarations.
 
 This is all best shown using an example:
 
@@ -494,3 +499,19 @@ try
 catch (e)
     # Catch statement(s) ...
 ```
+
+Comments
+--------
+
+Comments are created using the `#` character and last to the end of the line.
+
+```
+var x = nil; # This is a comment.
+```
+
+What's Left
+-----------
+
+The language could benefit from some finishing touches:
+- Modules so a program can be split over more than one file.
+- Extending the standard library (basic maths, IO, etc.).
