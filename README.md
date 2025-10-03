@@ -64,7 +64,7 @@ Variables
 ### Variable Declarations
 
 Variable declarations are performed via the `var` keyword.
-* A variable name must consist of underscores, letters, or digits, and start with either an underscore or digit.
+* A variable name must consist of underscores, letters, or digits, and start with either an underscore or letter.
 * It is mandatory to assign a variable a value upon declaration.
 
 ```
