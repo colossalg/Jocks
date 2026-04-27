@@ -276,7 +276,7 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
     public String visitNewInvocation(NewInvocation expression) {
         final var stringBuilder = new StringBuilder();
         stringBuilder.append("new ");
-        stringBuilder.append(expression.getIdentifier().getText());
+        stringBuilder.append(visit(expression.getSubExpression()));
         stringBuilder.append('(');
         final var arguments = expression.getArguments();
         if (!arguments.isEmpty()) {

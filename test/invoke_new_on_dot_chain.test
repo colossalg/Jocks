@@ -1,0 +1,29 @@
+class Pair {
+    fun __init__(self, item_1, item_2) {
+        self.item_1 = item_1;
+        self.item_2 = item_2;
+    }
+}
+
+class C_1 {
+    fun __init__(self) {}
+
+    fun __str__(self) {
+        return "Called C_1.__str__";
+    }
+}
+
+class C_2 {
+    fun __init__(self) {}
+
+    fun __str__(self) {
+        return "Called C_2.__str__";
+    }
+}
+
+var p = new Pair(C_1, C_2);
+print new p.item_1();
+print new p.item_2();
+---* EXPECT *---
+Called C_1.__str__
+Called C_2.__str__

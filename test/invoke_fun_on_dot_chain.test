@@ -1,0 +1,21 @@
+class Pair {
+    fun __init__(self, item_1, item_2) {
+        self.item_1 = item_1;
+        self.item_2 = item_2;
+    }
+}
+
+fun f_1() {
+    print "Called f_1";
+}
+
+fun f_2() {
+    print "Called f_2";
+}
+
+var p = new Pair(f_1, f_2);
+p.item_1();
+p.item_2();
+---* EXPECT *---
+Called f_1
+Called f_2
