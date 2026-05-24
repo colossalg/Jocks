@@ -571,5 +571,5 @@ What's Left
 -----------
 
 The language could benefit from some finishing touches:
-- Modules so a program can be split over more than one file.
+- ~Modules so a program can be split over more than one file.~ (Implemented, but not yet documented).
 - Extending the standard library (basic maths, IO, etc.).
