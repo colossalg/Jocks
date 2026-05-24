@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 import pathlib
 import subprocess
@@ -166,23 +167,26 @@ def remove_files_if_exist(file_paths):
         if os.path.exists(file_path):
             os.remove(file_path)
 
+def run_test(test):
+    source, expect = extract_source_and_expect(test.test_file_path)
+    write_to_file(test.get_source_file_path(), source)
+    result = run_jocks_and_get_output(test.get_source_file_path())
+    if result == expect:
+        test.passed = True
+        remove_files_if_exist([
+            test.get_source_file_path(),
+            test.get_expect_file_path(),
+            test.get_result_file_path()
+        ])
+    else:
+        test.passed = False
+        write_to_file(test.get_expect_file_path(), expect)
+        write_to_file(test.get_result_file_path(), result)
+
 def run_tests():
     tests = [Test(test_file_path) for test_file_path in get_cwd().glob('*.test')]
-    for test in tests:
-        source, expect = extract_source_and_expect(test.test_file_path)
-        write_to_file(test.get_source_file_path(), source)
-        result = run_jocks_and_get_output(test.get_source_file_path())
-        if result == expect:
-            test.passed = True
-            remove_files_if_exist([
-                test.get_source_file_path(),
-                test.get_expect_file_path(),
-                test.get_result_file_path()
-            ])
-        else:
-            test.passed = False
-            write_to_file(test.get_expect_file_path(), expect)
-            write_to_file(test.get_result_file_path(), result)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.map(run_test, tests)
     create_and_view_html_results(tests)
 
 def clean():
