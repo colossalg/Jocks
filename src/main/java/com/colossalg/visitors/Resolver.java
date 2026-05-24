@@ -1,6 +1,6 @@
 package com.colossalg.visitors;
 
-import com.colossalg.ResolverException;
+import com.colossalg.exception.ResolverException;
 import com.colossalg.Token;
 import com.colossalg.expression.*;
 import com.colossalg.statement.*;
@@ -177,6 +177,11 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
     }
 
     @Override
+    public Void visitImportExpression(ImportExpression expression) {
+        return null;
+    }
+
+    @Override
     public Void visitLogicalExpression(LogicalExpression expression) {
         visit(expression.getLftSubExpression());
         visit(expression.getRgtSubExpression());
@@ -253,6 +258,10 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
     @Override
     public Void visitLiteralExpression(LiteralExpression expression) {
         return null;
+    }
+
+    public void pushModuleTopLevelScope() {
+        begScope();
     }
 
     private void visitFunDeclarationBody(FunDeclaration statement) {

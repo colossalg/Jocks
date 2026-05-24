@@ -1,0 +1,11 @@
+var module_2 = import "./module_2.jocks";
+
+print "Initialising module 1";
+
+fun foo() {
+    print "Module 1 -> foo()";
+}
+
+fun bar() {
+    print "Module 2 -> foo()";
+}

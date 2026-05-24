@@ -1,0 +1,8 @@
+fun foo() {
+    fun bar() {
+        var x = nil;
+        x.x; # Crash
+    }
+    bar();
+}
+foo();

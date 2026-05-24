@@ -21,6 +21,10 @@ public class SymbolTable {
                 : this;
     }
 
+    public HashMap<String, JocksValue> getVariables() {
+        return _variables;
+    }
+
     public void createVariable(String identifier, JocksValue value) {
         if (_variables.containsKey(identifier)) {
             throw _exceptionFactory.createExceptionWithoutFileOrLine(

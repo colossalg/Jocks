@@ -1,0 +1,10 @@
+var module = import "./import_with_runtime_error.jocks";
+module.foo(); # Invalid, but won't be hit.
+---* EXPECT *---
+Left sub expression of '.' expression did not evaluate to an instance, class, or module.
+
+	An internal runtime error was encountered (at line 4 of file 'D:\Jocks\test\import_with_runtime_error.jocks').
+	Call stack:
+		foo at D:\Jocks\test\import_with_runtime_error.jocks:8
+		bar at D:\Jocks\test\import_with_runtime_error.jocks:6
+

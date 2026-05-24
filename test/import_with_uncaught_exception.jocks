@@ -1,0 +1,7 @@
+fun foo() {
+    fun bar() {
+        throw "Uncaught exception from module";
+    }
+    bar();
+}
+foo();

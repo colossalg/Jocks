@@ -1,4 +1,4 @@
-package com.colossalg;
+package com.colossalg.exception;
 
 public class ScannerException extends JocksCompileException {
 

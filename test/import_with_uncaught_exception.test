@@ -1,0 +1,5 @@
+var module = import "./import_with_uncaught_exception.jocks";
+module.foo(); # Invalid, but won't be hit.
+---* EXPECT *---
+ERROR - Program terminating with uncaught thrown value.
+	Consider adding a top level try/catch block to log the exception.

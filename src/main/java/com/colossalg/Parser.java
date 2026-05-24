@@ -1,5 +1,6 @@
 package com.colossalg;
 
+import com.colossalg.exception.ParserException;
 import com.colossalg.expression.*;
 import com.colossalg.statement.*;
 
@@ -372,7 +373,7 @@ public class Parser {
                 TokenType.NIL
         };
 
-        if (match(TokenType.NEW, TokenType.LFT_PARENTHESIS, TokenType.IDENTIFIER)) {
+        if (match(TokenType.IMPORT, TokenType.NEW, TokenType.LFT_PARENTHESIS, TokenType.IDENTIFIER)) {
             return parseDotAndFunInvocationChain();
         } else if (match(literalTokenTypes)) {
             final var result = new LiteralExpression(peek());
@@ -421,13 +422,22 @@ public class Parser {
     }
 
     private Expression parseInvokable() {
-        if (match(TokenType.NEW)) {
+        if (match(TokenType.IMPORT)) {
+            return parseImport();
+        } else if (match(TokenType.NEW)) {
             return parseNewInvocation();
         } else if (match(TokenType.LFT_PARENTHESIS)) {
             return parseGrouping();
         } else {
             return parseIdentifier();
         }
+    }
+
+    private Expression parseImport() {
+        consume(TokenType.IMPORT);
+        final var pathToken = peek();
+        consume(TokenType.STRING);
+        return new ImportExpression(pathToken);
     }
 
     private Expression parseNewInvocation() {

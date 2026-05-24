@@ -22,6 +22,7 @@ public enum TokenType {
     LESS_THAN_OR_EQUAL,
     MORE_THAN,
     MORE_THAN_OR_EQUAL,
+    IMPORT,
     AND,
     OR,
     STRING,
