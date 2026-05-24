@@ -1,0 +1,23 @@
+var module_1 = import "./module_1.jocks";
+var module_2 = import "./module_2.jocks";
+
+module_1.foo();
+module_1.bar();
+
+print module_2.some_value;
+print module_1.module_2.some_value;
+
+module_2.some_value = "New Value";
+
+print module_2.some_value;
+print module_1.module_2.some_value;
+
+---* EXPECT *---
+Initialising module 2
+Initialising module 1
+Module 1 -> foo()
+Module 2 -> foo()
+Old Value
+Old Value
+New Value
+New Value

@@ -1,5 +1,6 @@
 package com.colossalg.visitors;
 
+import com.colossalg.JocksLoader;
 import com.colossalg.Token;
 import com.colossalg.TokenType;
 import com.colossalg.builtin.functions.*;
@@ -11,14 +12,19 @@ import com.colossalg.dataTypes.primitives.*;
 import com.colossalg.expression.*;
 import com.colossalg.statement.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Supplier;
 
 public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<JocksValue> {
 
-    public Interpreter() {
+    public Interpreter(String sourceFile) {
+        _sourceFile = sourceFile;
+
         // Type checking
         _symbolTable.createVariable("is_nil", new IsType<>("is_nil", JocksNil.class));
         _symbolTable.createVariable("is_bool", new IsType<>("is_bool", JocksBool.class));
@@ -266,6 +272,59 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
     }
 
     @Override
+    public JocksValue visitImportExpression(ImportExpression expression) {
+        final var pathToken = expression.getPath();
+        final var canonPath = resolveModulePath(pathToken);
+
+        if (_moduleCache.containsKey(canonPath)) {
+            return _moduleCache.get(canonPath);
+        }
+
+        if (_importStack.contains(canonPath)) {
+            throw _exceptionFactory.createExceptionWithFileAndLine(
+                    pathToken.getFile(),
+                    pathToken.getLine(),
+                    "Cyclic import detected: '%s' is already being loaded.",
+                    canonPath);
+        }
+
+        final List<Statement> moduleStatements;
+        try {
+            moduleStatements = JocksLoader.loadModule(canonPath);
+        } catch (IOException ex) {
+            throw _exceptionFactory.createExceptionWithFileAndLine(
+                    pathToken.getFile(),
+                    pathToken.getLine(),
+                    "Could not read module file '%s': %s",
+                    canonPath,
+                    ex.getMessage());
+        }
+
+        _importStack.push(canonPath);
+        final var savedSymbolTable = _symbolTable;
+        final var savedSourceFile  = _sourceFile;
+        final var moduleScope = new SymbolTable(_rootSymbolTable, _exceptionFactory);
+        _symbolTable = moduleScope;
+        _sourceFile  = canonPath;
+
+        try {
+            visitAll(moduleStatements);
+        } finally {
+            _symbolTable = savedSymbolTable;
+            _sourceFile  = savedSourceFile;
+            _importStack.pop();
+        }
+
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+
+        final var module = new JocksModule(canonPath, moduleScope.getVariables());
+        _moduleCache.put(canonPath, module);
+        return module;
+    }
+
+    @Override
     public JocksValue visitLogicalExpression(LogicalExpression expression) {
         final var operator = expression.getOperator();
         final var shortCircuitValue = switch (operator.getType()) {
@@ -407,6 +466,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             return JocksNil.Instance;
         }
 
+        if ((lhsExpressionResult instanceof JocksModule module)) {
+            // Return the property if it exists.
+            return module.getProperty(rhsIdentifier.getText())
+                    .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
+                            rhsIdentifier.getFile(),
+                            rhsIdentifier.getLine(),
+                            "Couldn't find export '%s' in module.",
+                            rhsIdentifier.getText()));
+        }
+
         if ((lhsExpressionResult instanceof JocksInstance instance)) {
             // Return the property if it exists, otherwise return the method if it exists.
             return instance
@@ -432,7 +501,7 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         throw _exceptionFactory.createExceptionWithFileAndLine(
                 rhsIdentifier.getFile(),
                 rhsIdentifier.getLine(),
-                "Left sub expression of '.' expression did not evaluate to an instance or class.");
+                "Left sub expression of '.' expression did not evaluate to an instance, class, or module.");
     }
 
     @Override
@@ -532,13 +601,13 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
             if (_isThrowing) {
                 return JocksNil.Instance;
             }
-            final var instance = JocksValue.cast(lhsResult, JocksInstance.class)
+            final var propCollection = JocksValue.cast(lhsResult, JocksPropertyCollection.class)
                     .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                             lhsDotExpression.getRhsIdentifier().getFile(),
                             lhsDotExpression.getRhsIdentifier().getLine(),
-                            "The left sub expression did not evaluate to an instance during '.' assignment expression."));
+                            "The left sub expression did not evaluate to an instance or module during '.' assignment expression."));
             final var property = lhsDotExpression.getRhsIdentifier().getText();
-            instance.setProperty(property, rhsResult);
+            propCollection.setProperty(property, rhsResult);
         } else if (expression.getLhsExpression() instanceof VarExpression lhsVarExpression) {
             _symbolTable
                     .getAncestor(lhsVarExpression.getSymbolTableDepth())
@@ -623,11 +692,35 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
         _symbolTable = _symbolTable.getParent();
     }
 
+    private String resolveModulePath(Token pathToken) {
+        final var rawPath = (String) pathToken.getLiteral();
+        try {
+            final var parentDir = new File(_sourceFile).getAbsoluteFile().getParentFile();
+            return new File(parentDir, rawPath).getCanonicalPath();
+        } catch (IOException ex) {
+            throw _exceptionFactory.createExceptionWithFileAndLine(
+                    pathToken.getFile(),
+                    pathToken.getLine(),
+                    "Could not resolve import path '%s': %s",
+                    rawPath,
+                    ex.getMessage());
+        }
+    }
+
+    // Errors
     private final List<String> _callStackEntryInfo = new ArrayList<>();
     private final ExceptionFactory _exceptionFactory = new ExceptionFactory(() -> _callStackEntryInfo);
-    private SymbolTable _symbolTable = new SymbolTable(null, _exceptionFactory);
+    // Symbol table
+    private final SymbolTable _rootSymbolTable = new SymbolTable(null, _exceptionFactory);
+    private SymbolTable _symbolTable = _rootSymbolTable;
+    // Return state
     private JocksValue _returnValue = JocksNil.Instance;
-    private boolean _isReturning = false;
+    private boolean    _isReturning = false;
+    // Thrown state
     private JocksValue _thrownValue = JocksNil.Instance;
-    private boolean _isThrowing = false;
+    private boolean    _isThrowing  = false;
+    // Module state
+    private final HashMap<String, JocksModule> _moduleCache = new HashMap<>();
+    private final Stack<String> _importStack = new Stack<>();
+    private String _sourceFile;
 }

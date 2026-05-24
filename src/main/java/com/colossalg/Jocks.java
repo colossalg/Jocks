@@ -1,13 +1,10 @@
 package com.colossalg;
 
+import com.colossalg.exception.JocksCompileException;
 import com.colossalg.statement.Statement;
 import com.colossalg.visitors.Interpreter;
 import com.colossalg.visitors.PrettyPrinter;
-import com.colossalg.visitors.Resolver;
-import com.colossalg.JocksCompileException;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -20,23 +17,13 @@ public class Jocks {
         }
 
         final var file = args[0];
-        String fileContents;
+        final List<Statement> statements;
         try {
-            fileContents = readFileContents(file);
+            statements = JocksLoader.load(file);
         } catch (IOException exception) {
             System.out.println("ERROR - Couldn't read file.");
             System.out.println(exception.getMessage());
             return;
-        }
-
-        final List<Statement> statements;
-        try {
-            statements = new Parser(
-                    new Scanner(fileContents, file).scanTokens())
-                    .parse();
-
-            new Resolver().visitAll(statements);
-
         } catch (JocksCompileException ex) {
             System.out.println(ex.getMessage());
             return;
@@ -44,7 +31,7 @@ public class Jocks {
 
         switch (args.length) {
             case 1:
-                interpret(statements);
+                interpret(file, statements);
                 break;
             case 2:
                 if (args[1].equals("--print")) {
@@ -59,21 +46,9 @@ public class Jocks {
         }
     }
 
-    private static String readFileContents(String file) throws IOException {
-        final var stringBuilder = new StringBuilder();
-        final var reader = new BufferedReader(new FileReader(file));
-        String line = reader.readLine();
-        while (line != null) {
-            stringBuilder.append(line);
-            stringBuilder.append('\n');
-            line = reader.readLine();
-        }
-        return stringBuilder.toString();
-    }
-
-    private static void interpret(List<Statement> statements) {
+    private static void interpret(String file, List<Statement> statements) {
         try {
-            final var interpreter = new Interpreter();
+            final var interpreter = new Interpreter(file);
             interpreter.visitAll(statements);
             if (interpreter.getIsThrowing()) {
                 System.out.println("ERROR - Program terminating with uncaught thrown value.");

@@ -1,0 +1,6 @@
+var module = import "./import_with_compile_error.jocks";
+module.foo(); # Invalid, but won't be hit.
+---* EXPECT *---
+An internal error was encountered in the 'Parser'.
+Where - (D:\Jocks\test\import_with_compile_error.jocks:1)
+What  - Expected token types ['SEMICOLON',], but found token type 'IDENTIFIER'.

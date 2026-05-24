@@ -43,3 +43,6 @@ build/
 /test/*.result
 /test/*.html
 /test/working.jocks
+
+### Claude files ###
+/.plans

@@ -1,0 +1,3 @@
+print "Initialising module 2";      # This will only run once, as the module will be cached.
+
+var some_value = "Old Value";

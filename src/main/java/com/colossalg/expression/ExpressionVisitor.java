@@ -5,6 +5,8 @@ public interface ExpressionVisitor<T> {
     @SuppressWarnings("unused") // False alarm, this has many usages.
     T visit(Expression expression);
 
+    T visitImportExpression(ImportExpression expression);
+
     T visitLogicalExpression(LogicalExpression expression);
 
     T visitBinaryExpression(BinaryExpression expression);

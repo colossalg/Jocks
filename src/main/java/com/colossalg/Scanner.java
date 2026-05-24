@@ -1,5 +1,7 @@
 package com.colossalg;
 
+import com.colossalg.exception.ScannerException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,6 +125,7 @@ public class Scanner {
         switch (literal)
         {
             // Keywords
+            case "import" -> addToken(TokenType.IMPORT);
             case "and" -> addToken(TokenType.AND);
             case "or" -> addToken(TokenType.OR);
             case "false" -> addToken(TokenType.FALSE);

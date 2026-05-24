@@ -215,6 +215,11 @@ public class PrettyPrinter implements StatementVisitor<String>, ExpressionVisito
     }
 
     @Override
+    public String visitImportExpression(ImportExpression expression) {
+        return "import " + expression.getPath().getText();
+    }
+
+    @Override
     public String visitLogicalExpression(LogicalExpression expression) {
         return String.format(
                 "%s %s %s",

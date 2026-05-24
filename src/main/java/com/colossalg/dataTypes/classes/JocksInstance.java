@@ -2,6 +2,7 @@ package com.colossalg.dataTypes.classes;
 
 import com.colossalg.TokenType;
 import com.colossalg.builtin.functions.BoundMethod;
+import com.colossalg.dataTypes.JocksPropertyCollection;
 import com.colossalg.dataTypes.JocksValue;
 import com.colossalg.dataTypes.functions.JocksFunction;
 
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class JocksInstance extends JocksValue {
+public class JocksInstance extends JocksPropertyCollection {
 
     public static String binaryOperatorTypeToSourceString(TokenType operator) {
         return switch (operator) {
@@ -60,6 +61,7 @@ public class JocksInstance extends JocksValue {
     }
 
     public JocksInstance(JocksClass jClass) {
+        super(new HashMap<>());
         _class = jClass;
     }
 
@@ -137,15 +139,6 @@ public class JocksInstance extends JocksValue {
         return _class;
     }
 
-    public Optional<JocksValue> getProperty(String identifier) {
-        return Optional.ofNullable(
-                _properties.getOrDefault(identifier, null));
-    }
-
-    public void setProperty(String identifier, JocksValue value) {
-        _properties.put(identifier, value);
-    }
-
     public Optional<JocksFunction> getMethod(String identifier) {
         return _class.getMethodRecursive(identifier)
                 .map((method) -> new BoundMethod(this, method));
@@ -185,5 +178,4 @@ public class JocksInstance extends JocksValue {
     }
 
     private final JocksClass _class;
-    private final HashMap<String, JocksValue> _properties = new HashMap<>();
 }
