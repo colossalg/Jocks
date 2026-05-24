@@ -230,8 +230,7 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
 
     @Override
     public Void visitNewInvocation(NewInvocation expression) {
-        expression.setSymbolTableDepth(
-                getIdentifierSymbolTableDepth(expression.getIdentifier()));
+        visit(expression.getSubExpression());
 
         for (final var argument : expression.getArguments()) {
             visit(argument);

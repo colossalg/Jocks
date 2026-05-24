@@ -13,7 +13,7 @@ public class FunInvocation implements Expression {
         _file = file;
         _line = line;
         _subExpression = subExpression;
-        _arguments  = arguments;
+        _arguments = arguments;
     }
 
     @Override

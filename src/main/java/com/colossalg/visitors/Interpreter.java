@@ -478,16 +478,16 @@ public class Interpreter implements StatementVisitor<Void>, ExpressionVisitor<Jo
 
     @Override
     public JocksValue visitNewInvocation(NewInvocation expression) {
-        final var invoked = JocksValue.cast(
-                _symbolTable
-                        .getAncestor(expression.getSymbolTableDepth())
-                        .getVariable(expression.getIdentifier().getText()),
-                JocksClass.class)
+        final var subExpressionResult = visit(expression.getSubExpression());
+        if (_isThrowing) {
+            return JocksNil.Instance;
+        }
+
+        final var invoked = JocksValue.cast(subExpressionResult, JocksClass.class)
                 .orElseThrow(() -> _exceptionFactory.createExceptionWithFileAndLine(
                         expression.getFile(),
                         expression.getLine(),
-                        "The identifier '%s' is not a class from which a new instance can be instantiated.",
-                        expression.getIdentifier().getText()));
+                        "Sub expression did not evaluate to a class from which a new instance can be instantiated."));
 
         final var instance = invoked.createInstance();
 

@@ -1,7 +1,5 @@
 package com.colossalg.expression;
 
-import com.colossalg.Token;
-
 import java.util.List;
 
 public class NewInvocation implements Expression {
@@ -9,26 +7,18 @@ public class NewInvocation implements Expression {
     public NewInvocation(
             String file,
             int line,
-            Token identifier,
+            Expression subExpression,
             List<Expression> arguments
     ) {
         _file = file;
         _line = line;
-        _identifier = identifier;
-        _arguments  = arguments;
+        _subExpression = subExpression;
+        _arguments = arguments;
     }
 
     @Override
     public <T> T accept(ExpressionVisitor<T> visitor) {
         return visitor.visitNewInvocation(this);
-    }
-
-    public int getSymbolTableDepth() {
-        return _symbolTableDepth;
-    }
-
-    public void setSymbolTableDepth(int symbolTableDepth) {
-        _symbolTableDepth = symbolTableDepth;
     }
 
     public String getFile() {
@@ -39,17 +29,16 @@ public class NewInvocation implements Expression {
         return _line;
     }
 
-    public Token getIdentifier() {
-        return _identifier;
+    public Expression getSubExpression() {
+        return _subExpression;
     }
 
     public List<Expression> getArguments() {
         return _arguments;
     }
 
-    private int _symbolTableDepth = 0;
     private final String _file;
     private final int _line;
-    private final Token _identifier;
+    private final Expression _subExpression;
     private final List<Expression> _arguments;
 }

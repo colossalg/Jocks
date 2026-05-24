@@ -475,11 +475,19 @@ public class Parser {
         final var line = peek().getLine();
 
         consume(TokenType.NEW);
-        final var identifier = peek();
+        final var firstIdentifier = peek();
         consume(TokenType.IDENTIFIER);
+        Expression subExpression = new VarExpression(firstIdentifier);
+        while (match(TokenType.DOT)) {
+            consume(TokenType.DOT);
+            final var rhsIdentifier = peek();
+            consume(TokenType.IDENTIFIER);
+            subExpression = new DotExpression(subExpression, rhsIdentifier);
+        }
+
         final var arguments = parseArgumentList();
 
-        return new NewInvocation(file, line, identifier, arguments);
+        return new NewInvocation(file, line, subExpression, arguments);
     }
 
     private Expression parseGrouping() throws ParserException {
