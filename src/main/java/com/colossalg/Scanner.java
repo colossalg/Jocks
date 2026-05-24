@@ -5,8 +5,7 @@ import java.util.List;
 
 public class Scanner {
 
-    public Scanner(ErrorReporter errorReporter, String source, String file) {
-        _errorReporter = errorReporter;
+    public Scanner(String source, String file) {
         _source = source;
         _file = file;
     }
@@ -156,7 +155,7 @@ public class Scanner {
     }
 
     private void reportError(String what) {
-        _errorReporter.report(new JocksError("Scanner", _file, _line, what));
+        throw new ScannerException(_file, _line, what);
     }
 
     private void addToken(TokenType type) {
@@ -179,7 +178,6 @@ public class Scanner {
         return _source.charAt(_curLexemeIndex);
     }
 
-    private final ErrorReporter _errorReporter;
     private final String _source;
     private final List<Token> _tokens = new ArrayList<>();
     private int _begLexemeIndex = 0;

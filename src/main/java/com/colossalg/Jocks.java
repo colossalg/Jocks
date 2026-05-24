@@ -4,6 +4,7 @@ import com.colossalg.statement.Statement;
 import com.colossalg.visitors.Interpreter;
 import com.colossalg.visitors.PrettyPrinter;
 import com.colossalg.visitors.Resolver;
+import com.colossalg.JocksCompileException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -28,32 +29,16 @@ public class Jocks {
             return;
         }
 
-        final var errorReporter = new ErrorReporter();
+        final List<Statement> statements;
+        try {
+            statements = new Parser(
+                    new Scanner(fileContents, file).scanTokens())
+                    .parse();
 
-        final var scanner = new Scanner(errorReporter, fileContents, file);
-        final var tokens  = scanner.scanTokens();
-        if (!errorReporter.getErrors().isEmpty()) {
-            for (final var error : errorReporter.getErrors()) {
-                System.out.println(error.getMessage());
-            }
-            return;
-        }
+            new Resolver().visitAll(statements);
 
-        final var parser = new Parser(errorReporter, tokens);
-        final var statements = parser.parse();
-        if (!errorReporter.getErrors().isEmpty()) {
-            for (final var error : errorReporter.getErrors()) {
-                System.out.println(error.getMessage());
-            }
-            return;
-        }
-
-        final var resolver = new Resolver(errorReporter);
-        resolver.visitAll(statements);
-        if (!errorReporter.getErrors().isEmpty()) {
-            for (final var error : errorReporter.getErrors()) {
-                System.out.println(error.getMessage());
-            }
+        } catch (JocksCompileException ex) {
+            System.out.println(ex.getMessage());
             return;
         }
 

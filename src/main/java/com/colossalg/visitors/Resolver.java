@@ -1,7 +1,6 @@
 package com.colossalg.visitors;
 
-import com.colossalg.ErrorReporter;
-import com.colossalg.JocksError;
+import com.colossalg.ResolverException;
 import com.colossalg.Token;
 import com.colossalg.expression.*;
 import com.colossalg.statement.*;
@@ -12,9 +11,7 @@ import java.util.Stack;
 
 public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void> {
 
-    public Resolver(ErrorReporter errorReporter) {
-        _errorReporter = errorReporter;
-
+    public Resolver() {
         begScope(); // Global scope
 
         // Type checking
@@ -150,12 +147,10 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
     @Override
     public Void visitReturnStatement(ReturnStatement statement) {
         if (!_isWithinFun) {
-            _errorReporter.report(
-                    new JocksError(
-                            "Resolver",
-                            statement.getFile(),
-                            statement.getLine(),
-                            "Return statements are only allowed from within a function or method."));
+            throw new ResolverException(
+                    statement.getFile(),
+                    statement.getLine(),
+                    "Return statements are only allowed from within a function or method.");
         }
         visitIfNotNull(statement.getSubExpression().orElse(null));
 
@@ -328,27 +323,21 @@ public class Resolver implements StatementVisitor<Void>, ExpressionVisitor<Void>
             final var scope = _scopes.get(_scopes.size() - 1 - i);
             if (scope.containsKey(token.getText())) {
                 if (!scope.get(token.getText())) {
-                    _errorReporter.report(
-                            new JocksError(
-                                    "Resolver",
-                                    token.getFile(),
-                                    token.getLine(),
-                                    "Attempting to reference undefined variable + '" + token.getText() + "'."));
+                    throw new ResolverException(
+                            token.getFile(),
+                            token.getLine(),
+                            "Attempting to reference undefined variable + '" + token.getText() + "'.");
                 }
                 return i;
             }
         }
 
-        _errorReporter.report(
-                new JocksError(
-                        "Resolver",
-                        token.getFile(),
-                        token.getLine(),
-                        "Attempting to reference undeclared variable + '" + token.getText() + "'."));
-        return -1;
+        throw new ResolverException(
+                token.getFile(),
+                token.getLine(),
+                "Attempting to reference undeclared variable + '" + token.getText() + "'.");
     }
 
-    private final ErrorReporter _errorReporter;
     private boolean _isWithinFun = false;
     private final Stack<HashMap<String, Boolean>> _scopes = new Stack<>();
 }

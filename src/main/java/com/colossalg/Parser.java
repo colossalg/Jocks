@@ -9,11 +9,9 @@ import java.util.Stack;
 
 public class Parser {
 
-    private static class ParserException extends Exception {}
-
     @FunctionalInterface
     private interface GetNextExpression {
-        Expression get() throws ParserException;
+        Expression get();
     }
 
     @FunctionalInterface
@@ -25,8 +23,7 @@ public class Parser {
                 Expression rhsSubExpression);
     }
 
-    public Parser(ErrorReporter errorReporter, List<Token> tokens) {
-        _errorReporter = errorReporter;
+    public Parser(List<Token> tokens) {
         _tokens = tokens;
     }
 
@@ -39,49 +36,18 @@ public class Parser {
     }
 
     private Statement parseStatement() {
-        try {
-            if (match(TokenType.CLASS)) {
-                return parseClassDeclaration();
-            } else if (match(TokenType.FUN)) {
-                return parseFunDeclaration();
-            } else if (match(TokenType.VAR)) {
-                return parseVarDeclaration();
-            } else {
-                return parseNonDeclarationStatement();
-            }
-        } catch (ParserException ex) {
-            synchronize();
-            return null;
+        if (match(TokenType.CLASS)) {
+            return parseClassDeclaration();
+        } else if (match(TokenType.FUN)) {
+            return parseFunDeclaration();
+        } else if (match(TokenType.VAR)) {
+            return parseVarDeclaration();
+        } else {
+            return parseNonDeclarationStatement();
         }
     }
 
-    private void synchronize() {
-        if (isNotAtEnd()) {
-            _index++;
-            while (isNotAtEnd()) {
-                if (match(TokenType.SEMICOLON)) {
-                    _index++;
-                    break;
-                } else if (match(
-                        TokenType.CLASS,
-                        TokenType.FUN,
-                        TokenType.VAR,
-                        TokenType.IF,
-                        TokenType.WHILE,
-                        TokenType.FOR,
-                        TokenType.TRY,
-                        TokenType.PRINT,
-                        TokenType.RETURN
-                )) {
-                    break;
-                } else {
-                    _index++;
-                }
-            }
-        }
-    }
-
-    private ClassDeclaration parseClassDeclaration() throws ParserException {
+    private ClassDeclaration parseClassDeclaration() {
         consume(TokenType.CLASS);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
@@ -103,7 +69,7 @@ public class Parser {
         return new ClassDeclaration(identifier, superClass, methods);
     }
 
-    private FunDeclaration parseFunDeclaration() throws ParserException {
+    private FunDeclaration parseFunDeclaration() {
         consume(TokenType.FUN);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
@@ -122,17 +88,14 @@ public class Parser {
         consume(TokenType.LFT_BRACE);
         final var statements = new ArrayList<Statement>();
         while (isNotAtEnd() && !match(TokenType.RGT_BRACE)) {
-            final var statement = parseStatement();
-            if (statement != null) {
-                statements.add(statement);
-            }
+            statements.add(parseStatement());
         }
         consume(TokenType.RGT_BRACE);
 
         return new FunDeclaration(identifier, parameters, statements);
     }
 
-    private VarDeclaration parseVarDeclaration() throws ParserException {
+    private VarDeclaration parseVarDeclaration() {
         consume(TokenType.VAR);
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
@@ -143,7 +106,7 @@ public class Parser {
         return new VarDeclaration(identifier, expression);
     }
 
-    private Statement parseNonDeclarationStatement() throws ParserException {
+    private Statement parseNonDeclarationStatement() {
         if (match(TokenType.IF)) {
             return parseIfElseStatement();
         } else if (match(TokenType.WHILE)) {
@@ -165,7 +128,7 @@ public class Parser {
         }
     }
 
-    private IfElseStatement parseIfElseStatement() throws ParserException {
+    private IfElseStatement parseIfElseStatement() {
         consume(TokenType.IF);
         consume(TokenType.LFT_PARENTHESIS);
         final var condition = parseExpression();
@@ -180,7 +143,7 @@ public class Parser {
         return new IfElseStatement(condition, thenStatement, elseStatement);
     }
 
-    private WhileStatement parseWhileStatement() throws ParserException {
+    private WhileStatement parseWhileStatement() {
         consume(TokenType.WHILE);
         consume(TokenType.LFT_PARENTHESIS);
         final var condition = parseExpression();
@@ -190,7 +153,7 @@ public class Parser {
         return new WhileStatement(condition, subStatement);
     }
 
-    private ForStatement parseForStatement() throws ParserException {
+    private ForStatement parseForStatement() {
         consume(TokenType.FOR);
         consume(TokenType.LFT_PARENTHESIS);
 
@@ -229,7 +192,7 @@ public class Parser {
         return new ForStatement(initializer, condition, increment, subStatement);
     }
 
-    private TryCatchStatement parseTryCatchStatement() throws ParserException {
+    private TryCatchStatement parseTryCatchStatement() {
         consume(TokenType.TRY);
         final var tryStatement = parseNonDeclarationStatement();
         consume(TokenType.CATCH);
@@ -246,7 +209,7 @@ public class Parser {
         );
     }
 
-    private ThrowStatement parseThrowStatement() throws ParserException {
+    private ThrowStatement parseThrowStatement() {
         consume(TokenType.THROW);
         final var subExpression = parseExpression();
         consume(TokenType.SEMICOLON);
@@ -254,21 +217,18 @@ public class Parser {
         return new ThrowStatement(subExpression);
     }
 
-    private BlockStatement parseBlockStatement() throws ParserException {
+    private BlockStatement parseBlockStatement() {
         consume(TokenType.LFT_BRACE);
         final var subStatements = new ArrayList<Statement>();
         while (isNotAtEnd() && !match(TokenType.RGT_BRACE)) {
-            final var subStatement = parseStatement();
-            if (subStatement != null) {
-                subStatements.add(subStatement);
-            }
+            subStatements.add(parseStatement());
         }
         consume(TokenType.RGT_BRACE);
 
         return new BlockStatement(subStatements);
     }
 
-    private ReturnStatement parseReturnStatement() throws ParserException {
+    private ReturnStatement parseReturnStatement() {
         final var file = peek().getFile();
         final var line = peek().getLine();
 
@@ -282,7 +242,7 @@ public class Parser {
         return new ReturnStatement(file, line, subExpression);
     }
 
-    private PrintStatement parsePrintStatement() throws ParserException {
+    private PrintStatement parsePrintStatement() {
         consume(TokenType.PRINT);
         final var subExpression = parseExpression();
         consume(TokenType.SEMICOLON);
@@ -290,18 +250,18 @@ public class Parser {
         return new PrintStatement(subExpression);
     }
 
-    private ExpressionStatement parseExpressionStatement() throws ParserException {
+    private ExpressionStatement parseExpressionStatement() {
         final var subExpression = parseExpression();
         consume(TokenType.SEMICOLON);
 
         return new ExpressionStatement(subExpression);
     }
 
-    private Expression parseExpression() throws ParserException {
+    private Expression parseExpression() {
         return parseAssignment();
     }
 
-    private Expression parseAssignment() throws ParserException {
+    private Expression parseAssignment() {
         var result = parseLogicalOp();
 
         if (match(TokenType.EQUAL)) {
@@ -315,21 +275,21 @@ public class Parser {
         return result;
     }
 
-    private Expression parseLogicalOp() throws ParserException {
+    private Expression parseLogicalOp() {
         return parseLogicalOpChain(
                 this::parseBinaryOpEqualityComparison,
                 TokenType.AND,
                 TokenType.OR);
     }
 
-    private Expression parseBinaryOpEqualityComparison() throws ParserException {
+    private Expression parseBinaryOpEqualityComparison() {
         return parseBinaryOpChain(
                 this::parseBinaryOpInequalityComparison,
                 TokenType.EQUAL_EQUAL,
                 TokenType.BANGS_EQUAL);
     }
 
-    private Expression parseBinaryOpInequalityComparison() throws ParserException {
+    private Expression parseBinaryOpInequalityComparison() {
         return parseBinaryOpChain(
                 this::parseBinaryOpAddOrSub,
                 TokenType.LESS_THAN,
@@ -338,14 +298,14 @@ public class Parser {
                 TokenType.MORE_THAN_OR_EQUAL);
     }
 
-    private Expression parseBinaryOpAddOrSub() throws ParserException {
+    private Expression parseBinaryOpAddOrSub() {
         return parseBinaryOpChain(
                 this::parseBinaryOpMulOrDiv,
                 TokenType.ADD,
                 TokenType.SUB);
     }
 
-    private Expression parseBinaryOpMulOrDiv() throws ParserException {
+    private Expression parseBinaryOpMulOrDiv() {
         return parseBinaryOpChain(
                 this::parseUnaryOpChain,
                 TokenType.MUL,
@@ -355,14 +315,14 @@ public class Parser {
     private Expression parseLogicalOpChain(
             GetNextExpression getNextExpr,
             TokenType... tokenTypes
-    ) throws ParserException {
+    ) {
         return parseLhsRhsOpChain(getNextExpr, LogicalExpression::new, tokenTypes);
     }
 
     private Expression parseBinaryOpChain(
             GetNextExpression getNextExpr,
             TokenType... tokenTypes
-    ) throws ParserException {
+    ) {
         return parseLhsRhsOpChain(getNextExpr, BinaryExpression::new, tokenTypes);
     }
 
@@ -370,7 +330,7 @@ public class Parser {
             GetNextExpression getNextExpr,
             CreateLhsRhsOpExpression createLhsRhsOpExpr,
             TokenType... tokenTypes
-    ) throws ParserException {
+    ) {
         var result = getNextExpr.get();
         while (match(tokenTypes)) {
             final var operator = peek();
@@ -385,7 +345,7 @@ public class Parser {
         return result;
     }
 
-    private Expression parseUnaryOpChain() throws ParserException {
+    private Expression parseUnaryOpChain() {
         final var unaryOpTokenTypes = new TokenType[] { TokenType.BANGS, TokenType.ADD, TokenType.SUB };
 
         final var precedingOps = new Stack<Token>();
@@ -403,7 +363,7 @@ public class Parser {
         return result;
     }
 
-    private Expression parseAtomic() throws ParserException {
+    private Expression parseAtomic() {
         final var literalTokenTypes = new TokenType[]{
                 TokenType.STRING,
                 TokenType.NUMBER,
@@ -425,7 +385,7 @@ public class Parser {
                 peek().getType().name()));
     }
 
-    private Expression parseDotAndFunInvocationChain() throws ParserException {
+    private Expression parseDotAndFunInvocationChain() {
         var result = parseInvokable();
         while (match(TokenType.DOT, TokenType.LFT_PARENTHESIS)) {
             if (match(TokenType.DOT)) {
@@ -447,7 +407,7 @@ public class Parser {
         return result;
     }
 
-    private List<Expression> parseArgumentList() throws ParserException {
+    private List<Expression> parseArgumentList() {
         consume(TokenType.LFT_PARENTHESIS);
         final var arguments = new ArrayList<Expression>();
         while (isNotAtEnd() && !match(TokenType.RGT_PARENTHESIS)) {
@@ -460,7 +420,7 @@ public class Parser {
         return arguments;
     }
 
-    private Expression parseInvokable() throws ParserException {
+    private Expression parseInvokable() {
         if (match(TokenType.NEW)) {
             return parseNewInvocation();
         } else if (match(TokenType.LFT_PARENTHESIS)) {
@@ -470,7 +430,7 @@ public class Parser {
         }
     }
 
-    private Expression parseNewInvocation() throws ParserException {
+    private Expression parseNewInvocation() {
         final var file = peek().getFile();
         final var line = peek().getLine();
 
@@ -490,7 +450,7 @@ public class Parser {
         return new NewInvocation(file, line, subExpression, arguments);
     }
 
-    private Expression parseGrouping() throws ParserException {
+    private Expression parseGrouping() {
         consume(TokenType.LFT_PARENTHESIS);
         final var subExpression = parseExpression();
         consume(TokenType.RGT_PARENTHESIS);
@@ -498,14 +458,14 @@ public class Parser {
         return new GroupingExpression(subExpression);
     }
 
-    private Expression parseIdentifier() throws ParserException {
+    private Expression parseIdentifier() {
         final var identifier = peek();
         consume(TokenType.IDENTIFIER);
 
         return new VarExpression(identifier);
     }
 
-    private void consume(TokenType... tokenTypes) throws ParserException {
+    private void consume(TokenType... tokenTypes) {
         if (!match(tokenTypes)) {
             final var tokenTypesStringBuilder = new StringBuilder();
             for (final var tokenType : tokenTypes) {
@@ -536,15 +496,13 @@ public class Parser {
     }
 
     private ParserException panic(String what) {
-        _errorReporter.report(new JocksError("Parser", peek().getFile(), peek().getLine(), what));
-        return new ParserException(); // To unwind call stack back to synchronization point, to resume parsing
+        throw new ParserException(peek().getFile(), peek().getLine(), what);
     }
 
     private Token peek() {
         return _tokens.get(_index);
     }
 
-    private final ErrorReporter _errorReporter;
     private final List<Token> _tokens;
     private int _index = 0;
 }
